@@ -1,65 +1,83 @@
-const API_BASE = "http://localhost:8085/api/v1";
-const RECOMMENDATION_URL = API_BASE.concat("/recommendation-letter");
-const TOKEN_URL = API_BASE.concat("/token");
-const CREATE_LETTER_FORM = "create-letter-form";
-const CREATE_LETTER_RESULT_DIV = "create-letter-result-div";
+import { hostApi } from "./config";
+const BASE_URL = hostApi.concat("/api/v1");
+var playerId;
 
-async function submitCreateLetterForm() {
-  const form = document.getElementById(CREATE_LETTER_FORM) as HTMLFormElement;
-  const formData = new FormData(form);
-  if (form.checkValidity()) {
-    postCreateLetterRequest(
-      formData.get("letterAuthorEmail").toString(),
-      formData.get("letterBody").toString()
-    )
-      .then(async (response) => {
-        if (response.status == 201) {
-          showResult(
-            "Letter created successfully. Please check your email for the verification link"
-          );
-        } else {
-            const responseText = await response.text();
-            showResult("Failed to create letter " + responseText);
-        }
-      })
-      .catch((exception) => {
-        console.log(exception);
-        showResult("Something went wrong...");
-      });
-  } else {
-    form.reportValidity();
-  }
-}
-
-function showResult(message: string): void {
+async function startGame() {
+  playerId = await getPlayerId();
   document
-    .getElementById(CREATE_LETTER_FORM)
+    .getElementById("start-game-div")
     .setAttribute("style", "display: none");
-  document
-    .getElementById(CREATE_LETTER_RESULT_DIV)
-    .setAttribute("style", "display: block");
-  document.getElementById("create-letter-result-message-div").textContent =
-    message;
-}
+  console.log("hidden");
 
-function getEmailsByAddress(emailAddress: string) {
-    
-}
-
-function postCreateLetterRequest(
-  letterAuthorEmail: string,
-  letterBody: string
-): Promise<Response> {
-  return fetch(RECOMMENDATION_URL, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-    method: "POST",
-    body: JSON.stringify({
-      authorEmail: letterAuthorEmail,
-      body: letterBody,
-    }),
+  getChallenge().then((challenge) => {
+    const challengeDiv: HTMLDivElement = document.getElementById(
+      "current-challenge-div"
+    ) as HTMLDivElement;
+    challengeDiv.setAttribute("style", "display: block");
+    challengeDiv.appendChild(createChallengeChoicesDiv(challenge));
   });
 }
 
-export { postCreateLetterRequest, submitCreateLetterForm };
+function createChallengeChoicesDiv(challenge: object): any {
+  const div: HTMLElement = document.createElement("div");
+  const possibleAnswers: Array<string> = challenge["possible_answers"]
+  possibleAnswers.forEach((answer) => {
+    const answerDiv = document.createElement("div");
+    answerDiv.textContent = answer;
+    div.appendChild(answerDiv);
+  })
+  return div;
+}
+
+function createAnswerDiv(challenge: string, answerText: string) {
+  const div = document.createElement("div");
+  div.textContent = answerText;
+  div.appendChild(submitAnswerButton(challenge, answerText));
+  return div;
+}
+function submitAnswerButton(challenge: string, answerText: string): any {
+  const button: HTMLButtonElement = document.createElement("button");
+  button.onclick = () => submitAnswer(challenge, answerText);
+  button.textContent = "Answer!";
+  return button;
+}
+
+async function getPlayerId(): Promise<string> {
+  return await (
+    await fetch(BASE_URL.concat("/new-session-id"), {
+      method: "POST",
+    })
+  ).text();
+}
+
+async function getChallenge(): Promise<object> {
+  return await (
+    await fetch(BASE_URL.concat("/request-challenge"), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        player_id: playerId,
+      }),
+    })
+  ).json();
+}
+
+async function submitAnswer(challenge_key, answer): Promise<string> {
+  return await (
+    await fetch(BASE_URL.concat("/request-challenge"), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        player_id: playerId,
+        challenge_key: challenge_key,
+        answer: answer,
+      }),
+    })
+  ).text();
+}
+
+export { startGame };

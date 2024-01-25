@@ -12,50 +12,20 @@
   </head>
   <body>
     <div class="text-center p-3">
-      <h1 class="font-monospace">Express Recommend</h1>
+      <h1 class="font-monospace">Pathological!</h1>
       <h5>
-        Express Recommend is a service that makes it easier for students <br />
-        and institutions to share and verify recommendation letters
+        Pathological is a game where doctors compete over image classification tasks. <br/>
+         The winner gets replaced by AI last.
       </h5>
     </div>
 
-    <div id="create-letter-result-div" class="p-5 border text-center container justify-content-center w-50" style="display: none">
-      <div id="create-letter-result-message-div"></div>
+    <div class="text-center" id="start-game-div"> 
+      <button type="button" class="btn" onclick="startGame()"> Start Game!</button>
+    </div>
+    
+    <div class="text-center" id="current-challenge-div" style="display: none;">
     </div>
 
-    <div class="text-center container justify-content-center w-50">
-      <form class="form-control p-5" id="create-letter-form">
-        <div class="m-1">
-          <label class="form-label" for="letterAuthorEmail">
-            Author Email
-          </label>
-          <input
-            class="form-control m-1"
-            type="email"
-            name="letterAuthorEmail"
-            id="letterAuthorEmail"
-          />
-        </div>
-
-        <div class="m-1">
-          <label for="letterBody"> Letter Body </label>
-          <input
-            class="form-control m-1 align-self-center"
-            type="text"
-            name="letterBody"
-            id="letterBody"
-          />
-        </div>
-        <div class="m-3"></div>
-        <button
-          type="button"
-          class="btn btn-large btn-primary"
-          onclick="submitCreateLetterForm()"
-        >
-          Create Letter
-        </button>
-      </form>
-    </div>
 
     <script src="main.js"></script>
     <script

@@ -28,5 +28,6 @@ class GameServiceTest(unittest.TestCase):
             challenge = self.game.request_challenge(player_id)
             self.game.solve_challenge(player_id, challenge.challenge_id, wrong_answer())
 
-        self.assertEqual(correct_answers + wrong_answers, len(self.game.active_sessions[player_id].images_faced))
+        self.assertEqual(correct_answers + wrong_answers,
+                         len(self.game.player_repository.get_player(player_id).images_faced))
         self.assertEqual(correct_answers, self.game.get_player_score(player_id))

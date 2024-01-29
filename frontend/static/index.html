@@ -14,18 +14,27 @@
     <div class="text-center p-3">
       <h1 class="font-monospace">Pathological!</h1>
       <h5>
-        Pathological is a game where doctors compete over image classification tasks. <br/>
-         The winner gets replaced by AI last.
+        Pathological is a game where doctors compete over image classification
+        tasks. <br />
+        The winner gets replaced by AI last.
       </h5>
     </div>
-
-    <div class="text-center" id="start-game-div"> 
-      <button type="button" class="btn" onclick="startGame()"> Start Game!</button>
-    </div>
-    
-    <div class="text-center" id="current-challenge-div" style="display: none;">
+    <div id="game-timer-div">
+      Remaining time: <span id="game-timer-seconds"> </span>
     </div>
 
+    <div class="text-center" id="start-game-div">
+      <button type="button" class="btn" onclick="startGame()">
+        Start Game!
+      </button>
+    </div>
+    <div
+      class="text-center"
+      id="current-challenge-div"
+      style="display: none"
+    ></div>
+
+    <div id="player-score-div"></div>
 
     <script src="main.js"></script>
     <script

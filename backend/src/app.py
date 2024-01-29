@@ -29,7 +29,17 @@ def request_challenge():
 @app.route(endpoint("/solve-challenge"), methods=["POST"])
 def solve_challenge():
     data = request.json
-    return game_service.solve_challenge(data["player_id"], data["challenge_key"], data["answer"])
+    game_service.solve_challenge(data["player_id"], data["challenge_key"], data["answer"])
+    return '', 200
+
+
+@app.route(endpoint("/score/<player_id>"))
+def get_score(player_id: str):
+    score = game_service.get_player_score(player_id)
+    return {
+        "player_id": player_id,
+        "player_score": score
+    }
 
 
 def _to_response(challenge):

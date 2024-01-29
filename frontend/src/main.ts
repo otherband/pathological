@@ -1,9 +1,9 @@
-import { hostApi } from "./config";
-const BASE_URL = hostApi.concat("/api/v1");
+import { GameController } from "./controller";
+const gameController = new GameController();
 let playerId;
 
 async function startGame() {
-  playerId = await getPlayerId();
+  playerId = await gameController.getPlayerId();
   document
     .getElementById("start-game-div")
     .setAttribute("style", "display: none");
@@ -14,7 +14,7 @@ async function startGame() {
 
 function startNextChallenge() {
   const challengeDiv: HTMLDivElement = resetChallengeDiv();
-  getChallenge().then((challenge) => {
+  gameController.getChallenge(playerId).then((challenge) => {
     challengeDiv.setAttribute("style", "display: block");
     challengeDiv.appendChild(createChallengeChoicesDiv(challenge));
   });
@@ -46,49 +46,11 @@ function createAnswerDiv(challenge: string, answerText: string) {
 function submitAnswerButton(challenge: string, answerText: string): any {
   const button: HTMLButtonElement = document.createElement("button");
   button.onclick = () => {
-    submitAnswer(challenge, answerText);
+    gameController.submitAnswer(playerId, challenge, answerText);
     startNextChallenge();
   };
   button.textContent = "Answer!";
   return button;
-}
-
-async function getPlayerId(): Promise<string> {
-  return await (
-    await fetch(BASE_URL.concat("/new-session-id"), {
-      method: "POST",
-    })
-  ).text();
-}
-
-async function getChallenge(): Promise<object> {
-  return await (
-    await fetch(BASE_URL.concat("/request-challenge"), {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        player_id: playerId,
-      }),
-    })
-  ).json();
-}
-
-async function submitAnswer(challenge_key, answer): Promise<string> {
-  return await (
-    await fetch(BASE_URL.concat("/solve-challenge"), {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        player_id: playerId,
-        challenge_key: challenge_key,
-        answer: answer,
-      }),
-    })
-  ).text();
 }
 
 function textDiv(answerText: string): any {
@@ -111,26 +73,14 @@ function countDown() {
     timerElement.textContent = (remainingSeconds - 1).toString();
     sleep(1000).then(() => countDown());
   }
-
 }
 async function showScore() {
   const scoreDiv = document.getElementById("player-score-div");
-  scoreDiv.textContent = await getScore();
+  scoreDiv.textContent = await gameController.getScore(playerId);
 }
 
-function sleep(ms) {
+function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function getScore(): Promise<string> {
-  return await (
-    await fetch(BASE_URL.concat(`/score/${playerId}`), {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-  ).text();
 }
 
 export { startGame };

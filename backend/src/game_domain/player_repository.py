@@ -3,7 +3,7 @@ from abc import ABCMeta, abstractmethod
 from models.game_models import PlayerSession
 
 
-class PlayerRepository(metaclass=ABCMeta):
+class PlayerSessionRepository(metaclass=ABCMeta):
 
     @abstractmethod
     def get_player(self, player_id: str) -> PlayerSession:
@@ -18,7 +18,7 @@ class PlayerRepository(metaclass=ABCMeta):
         pass
 
 
-class EmbeddedPlayerRepository(PlayerRepository):
+class EmbeddedPlayerSessionRepository(PlayerSessionRepository):
     def __init__(self):
         self.players = {}
 

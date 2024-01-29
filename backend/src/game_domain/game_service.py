@@ -15,9 +15,9 @@ class GameService:
 
     def register_new_player(self) -> str:
         player = PlayerSession(player_id=str(uuid.uuid4()),
-                                       images_faced=set(),
-                                       images_solved=set(),
-                                       timestamp_start=time.time())
+                               images_faced=set(),
+                               images_solved=set(),
+                               timestamp_start=time.time())
         self.player_repository.add_player_session(player)
         return player.player_id
 

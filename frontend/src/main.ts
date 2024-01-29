@@ -42,7 +42,6 @@ function createAnswerDiv(
   answerText: string
 ): HTMLDivElement {
   const div = document.createElement("div");
-  div.appendChild(textDiv(answerText));
   div.appendChild(submitAnswerButton(challenge, answerText));
   return div;
 }
@@ -56,7 +55,8 @@ function submitAnswerButton(
     gameController.submitAnswer(playerId, challenge, answerText);
     startNextChallenge();
   };
-  button.textContent = "Answer!";
+  button.textContent =answerText;
+  button.classList.add("btn", "btn-danger", "w-25", "m-2");
   return button;
 }
 

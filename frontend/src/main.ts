@@ -1,5 +1,5 @@
 import { GameController } from "./controller";
-const gameController = new GameController();
+const gameController: GameController = new GameController();
 let playerId: string;
 
 async function startGame() {
@@ -28,8 +28,8 @@ function resetChallengeDiv() {
   return challengeDiv;
 }
 
-function createChallengeChoicesDiv(challenge: object): any {
-  const div: HTMLElement = document.createElement("div");
+function createChallengeChoicesDiv(challenge: object): HTMLDivElement {
+  const div: HTMLDivElement = document.createElement("div");
   const possibleAnswers: Array<string> = challenge["possible_answers"];
   possibleAnswers.forEach((answer) => {
     div.appendChild(createAnswerDiv(challenge["challenge_id"], answer));
@@ -37,14 +37,20 @@ function createChallengeChoicesDiv(challenge: object): any {
   return div;
 }
 
-function createAnswerDiv(challenge: string, answerText: string) {
+function createAnswerDiv(
+  challenge: string,
+  answerText: string
+): HTMLDivElement {
   const div = document.createElement("div");
   div.appendChild(textDiv(answerText));
   div.appendChild(submitAnswerButton(challenge, answerText));
   return div;
 }
 
-function submitAnswerButton(challenge: string, answerText: string): any {
+function submitAnswerButton(
+  challenge: string,
+  answerText: string
+): HTMLButtonElement {
   const button: HTMLButtonElement = document.createElement("button");
   button.onclick = () => {
     gameController.submitAnswer(playerId, challenge, answerText);
@@ -54,7 +60,7 @@ function submitAnswerButton(challenge: string, answerText: string): any {
   return button;
 }
 
-function textDiv(answerText: string): any {
+function textDiv(answerText: string): HTMLDivElement {
   const textDiv = document.createElement("div");
   textDiv.textContent = answerText;
   return textDiv;
@@ -65,7 +71,7 @@ function countDown() {
   const remainingSeconds: number =
     Number.parseInt(timerElement.textContent) || 15;
   if (remainingSeconds - 1 <= 0) {
-    console.log("Game has ended");
+    timerElement.textContent = "0!";
     document
       .getElementById("current-challenge-div")
       .setAttribute("style", "display: none");
@@ -81,7 +87,7 @@ async function showScore() {
   scoreDiv.textContent = await gameController.getScore(playerId);
 }
 
-function sleep(ms: number) {
+function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 

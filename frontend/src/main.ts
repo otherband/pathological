@@ -1,6 +1,6 @@
 import { GameController } from "./controller";
 const gameController = new GameController();
-let playerId;
+let playerId: string;
 
 async function startGame() {
   playerId = await gameController.getPlayerId();
@@ -43,6 +43,7 @@ function createAnswerDiv(challenge: string, answerText: string) {
   div.appendChild(submitAnswerButton(challenge, answerText));
   return div;
 }
+
 function submitAnswerButton(challenge: string, answerText: string): any {
   const button: HTMLButtonElement = document.createElement("button");
   button.onclick = () => {
@@ -74,6 +75,7 @@ function countDown() {
     sleep(1000).then(() => countDown());
   }
 }
+
 async function showScore() {
   const scoreDiv = document.getElementById("player-score-div");
   scoreDiv.textContent = await gameController.getScore(playerId);

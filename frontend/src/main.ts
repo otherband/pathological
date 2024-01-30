@@ -84,7 +84,7 @@ function countDown() {
   const remainingSeconds: number =
     Number.parseInt(timerElement.textContent) || 15;
   if (remainingSeconds - 1 <= 0) {
-    timerElement.textContent = "0!";
+    timerElement.textContent = "ZERO ";
     document
       .getElementById("current-challenge-div")
       .setAttribute("style", "display: none");

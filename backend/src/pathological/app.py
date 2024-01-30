@@ -1,13 +1,15 @@
 import attrs
-from flask import Flask, request
+from flask import Flask, request, make_response
 from flask_cors import CORS
 
 from pathological.game_domain.game_service import GameService
+from pathological.images.image_service import ImageService
 from pathological.models.game_models import Challenge
 
 app = Flask(__name__)
 CORS(app)
 game_service = GameService()
+image_service = ImageService()
 
 
 def endpoint(suffix):
@@ -31,6 +33,13 @@ def solve_challenge():
     data = request.json
     game_service.solve_challenge(data["player_id"], data["challenge_key"], data["answer"])
     return '', 200
+
+
+@app.route(endpoint("/image/<image_id>"))
+def get_image(image_id: str):
+    response = make_response()
+    response.headers["Content-Type"] = "image/png"
+    return image_service.get_image_by_id(image_id=image_id)
 
 
 @app.route(endpoint("/score/<player_id>"))

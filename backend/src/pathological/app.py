@@ -37,9 +37,9 @@ def solve_challenge():
 
 @app.route(endpoint("/image/<image_id>"))
 def get_image(image_id: str):
-    response = make_response()
+    response = make_response(image_service.get_image_by_id(image_id=image_id))
     response.headers["Content-Type"] = "image/png"
-    return image_service.get_image_by_id(image_id=image_id)
+    return response
 
 
 @app.route(endpoint("/score/<player_id>"))
@@ -53,7 +53,9 @@ def get_score(player_id: str):
 
 def _to_response(challenge):
     # noinspection PyTypeChecker
-    return attrs.asdict(Challenge(challenge_id=challenge.challenge_id, correct_answer=challenge.correct_answer,
+    return attrs.asdict(Challenge(challenge_id=challenge.challenge_id,
+                                  image_id=challenge.image_id,
+                                  correct_answer=challenge.correct_answer,
                                   possible_answers=list(challenge.possible_answers)))
 
 

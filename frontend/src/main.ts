@@ -1,6 +1,7 @@
 import { GameController } from "./controller";
 const gameController: GameController = new GameController();
 let playerId: string;
+const urlCreator = window.URL || window.webkitURL;
 
 async function startGame() {
   playerId = await gameController.getPlayerId();
@@ -16,6 +17,7 @@ function startNextChallenge() {
   const challengeDiv: HTMLDivElement = resetChallengeDiv();
   gameController.getChallenge(playerId).then((challenge) => {
     challengeDiv.setAttribute("style", "display: block");
+    challengeDiv.appendChild(createChallengeImageDiv(challenge));
     challengeDiv.appendChild(createChallengeChoicesDiv(challenge));
   });
 }
@@ -55,7 +57,7 @@ function submitAnswerButton(
     gameController.submitAnswer(playerId, challenge, answerText);
     startNextChallenge();
   };
-  button.textContent =answerText;
+  button.textContent = answerText;
   button.classList.add("btn", "btn-danger", "w-25", "m-2");
   return button;
 }
@@ -64,6 +66,17 @@ function textDiv(answerText: string): HTMLDivElement {
   const textDiv = document.createElement("div");
   textDiv.textContent = answerText;
   return textDiv;
+}
+
+function createChallengeImageDiv(challenge: object): HTMLDivElement {
+  const imageDiv = document.createElement("div");
+  const imageElement: HTMLImageElement = document.createElement("img");
+  gameController.getChallengeImage(challenge["image_id"]).then((blob) => {
+    imageElement.src = urlCreator.createObjectURL(blob);
+    imageElement.setAttribute("style", "display: flex");
+  });
+  imageDiv.appendChild(imageElement);
+  return imageDiv;
 }
 
 function countDown() {

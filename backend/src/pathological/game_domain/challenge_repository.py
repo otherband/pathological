@@ -18,7 +18,7 @@ class DummyChallengeRepository(ChallengeRepository):
     def __init__(self):
         self.challenges = {
             str(k): Challenge(challenge_id=str(k),
-                              image_id=str(k),
+                              image_id=random.choice(["image1.png", "image2.png"]),
                               correct_answer=str(k),
                               possible_answers={str(k), "A", "B"}) for k in range(300)
         }

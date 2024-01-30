@@ -40,7 +40,7 @@ class GameService:
         response_challenge = Challenge(challenge_id=challenge.challenge_id,
                                        correct_answer="",
                                        possible_answers=challenge.possible_answers,
-                                       image_id="")
+                                       image_id=challenge.image_id)
         return response_challenge
 
     def _get_answer(self, challenge_key):

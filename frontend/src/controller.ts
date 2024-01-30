@@ -9,6 +9,15 @@ class GameController {
       })
     ).text();
   }
+
+  async getChallengeImage(imageId: string): Promise<Blob> {
+    return await (
+      await fetch(BASE_URL.concat(`/image/${imageId}`), {
+        method: "GET",
+      })
+    ).blob();
+  }
+
   async getChallenge(playerId: string): Promise<object> {
     return await (
       await fetch(BASE_URL.concat("/request-challenge"), {

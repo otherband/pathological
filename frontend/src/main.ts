@@ -73,7 +73,7 @@ function createChallengeImageDiv(challenge: object): HTMLDivElement {
   const imageElement: HTMLImageElement = document.createElement("img");
   gameController.getChallengeImage(challenge["image_id"]).then((blob) => {
     imageElement.src = urlCreator.createObjectURL(blob);
-    imageElement.setAttribute("style", "display: flex");
+    imageElement.classList.add("challenge-img");
   });
   imageDiv.appendChild(imageElement);
   return imageDiv;

@@ -2,3 +2,10 @@
 .long-div { 
     height: 30%;
 }
+
+.challenge-img {
+    text-align: center;
+    width: 25%;
+    height: auto;
+    margin: 1%;
+}

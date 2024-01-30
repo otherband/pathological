@@ -9,7 +9,7 @@ async function startGame() {
     .setAttribute("style", "display: none");
   console.log("hidden");
   startNextChallenge();
-  countDown();
+  // countDown();
 }
 
 function startNextChallenge() {

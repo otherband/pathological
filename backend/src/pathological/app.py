@@ -2,8 +2,8 @@ import attrs
 from flask import Flask, request
 from flask_cors import CORS
 
-from game_domain.game_service import GameService
-from models.game_models import Challenge
+from pathological.game_domain.game_service import GameService
+from pathological.models.game_models import Challenge
 
 app = Flask(__name__)
 CORS(app)

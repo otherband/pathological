@@ -1,7 +1,7 @@
 import random
 from abc import ABCMeta, abstractmethod
 
-from models.game_models import Challenge
+from pathological.models.game_models import Challenge
 
 
 class ChallengeRepository(metaclass=ABCMeta):
@@ -17,7 +17,10 @@ class ChallengeRepository(metaclass=ABCMeta):
 class DummyChallengeRepository(ChallengeRepository):
     def __init__(self):
         self.challenges = {
-            str(k): Challenge(str(k), str(k), {str(k), "A", "B"}) for k in range(300)
+            str(k): Challenge(challenge_id=str(k),
+                              image_id=str(k),
+                              correct_answer=str(k),
+                              possible_answers={str(k), "A", "B"}) for k in range(300)
         }
 
     def get_random_challenge(self, excluded=None) -> Challenge:

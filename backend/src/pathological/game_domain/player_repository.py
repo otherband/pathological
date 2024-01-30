@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
-from models.game_models import PlayerSession
+from pathological.models.game_models import PlayerSession
 
 
 class PlayerSessionRepository(metaclass=ABCMeta):

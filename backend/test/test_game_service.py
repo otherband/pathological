@@ -1,7 +1,7 @@
 import unittest
 import uuid
 
-from game_domain.game_service import GameService
+from pathological.game_domain.game_service import GameService
 
 CORRECT_ANSWER = "1"
 
@@ -29,5 +29,5 @@ class GameServiceTest(unittest.TestCase):
             self.game.solve_challenge(player_id, challenge.challenge_id, wrong_answer())
 
         self.assertEqual(correct_answers + wrong_answers,
-                         len(self.game.player_repository.get_player(player_id).images_faced))
+                         len(self.game.player_repository.get_player(player_id).challenges_faced))
         self.assertEqual(correct_answers, self.game.get_player_score(player_id))

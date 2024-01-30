@@ -10,7 +10,7 @@ async function startGame() {
     .setAttribute("style", "display: none");
   console.log("hidden");
   startNextChallenge();
-  // countDown();
+  countDown();
 }
 
 function startNextChallenge() {
@@ -97,7 +97,11 @@ function countDown() {
 
 async function showScore() {
   const scoreDiv = document.getElementById("player-score-div");
-  scoreDiv.textContent = await gameController.getScore(playerId);
+  scoreDiv.classList.add("p-3", "display-2", "text-center");
+  const playerScoreResponse = await gameController.getScore(playerId);
+  console.log("Fetched response: " + JSON.stringify(playerScoreResponse));
+  const score = playerScoreResponse["player_score"] as number;
+  scoreDiv.appendChild(textDiv(`Player score: ${score}`));
 }
 
 function sleep(ms: number): Promise<void> {

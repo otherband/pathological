@@ -52,7 +52,7 @@ class GameController {
     ).text();
   }
 
-  async getScore(playerId: string): Promise<string> {
+  async getScore(playerId: string): Promise<object> {
     return await (
       await fetch(BASE_URL.concat(`/score/${playerId}`), {
         method: "GET",
@@ -60,7 +60,7 @@ class GameController {
           "Content-Type": "application/json",
         },
       })
-    ).text();
+    ).json();
   }
 }
 

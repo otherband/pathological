@@ -51,6 +51,13 @@ def get_score(player_id: str):
     }
 
 
+@app.route("/actuator/health")
+def health():
+    return {
+        "status": "UP"
+    }
+
+
 def _to_response(challenge):
     # noinspection PyTypeChecker
     return attrs.asdict(Challenge(challenge_id=challenge.challenge_id,

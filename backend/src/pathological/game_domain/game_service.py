@@ -12,15 +12,15 @@ class GameService:
         self.player_repository = player_repository
         self.challenge_repository = challenge_repository
 
-    def register_new_player(self) -> str:
+    def register_new_player(self) -> dict:
         player = PlayerSession(player_id=str(uuid.uuid4()),
                                challenges_faced=set(),
                                challenges_solved=set(),
                                timestamp_start=time.time())
         self.player_repository.add_player_session(player)
-        return player.player_id
+        return {"player_id": player.player_id}
 
-    def request_challenge(self, player_id) -> Challenge:
+    def request_challenge(self, player_id: str) -> Challenge:
         player = self.player_repository.get_player(player_id)
         random_challenge = self.challenge_repository.get_random_challenge(excluded=player.challenges_faced)
         player.challenges_faced.add(random_challenge.challenge_id)
@@ -33,8 +33,9 @@ class GameService:
             player.challenges_solved.add(challenge_id)
             self.player_repository.update_player(player)
 
-    def get_player_score(self, player_id: str):
-        return len(self.player_repository.get_player(player_id).challenges_solved)
+    def get_player_score(self, player_id: str) -> dict:
+        return {"player_id": player_id,
+                "player_score": len(self.player_repository.get_player(player_id).challenges_solved)}
 
     def _remove_answer(self, challenge: Challenge):
         response_challenge = Challenge(challenge_id=challenge.challenge_id,

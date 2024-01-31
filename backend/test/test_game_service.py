@@ -15,7 +15,8 @@ class GameServiceTest(unittest.TestCase):
         self.game = GameService()
 
     def test_game(self):
-        player_id = self.game.register_new_player()
+        player = self.game.register_new_player()
+        player_id = player['player_id']
         self.assertIsNotNone(player_id)
 
         correct_answers = 3
@@ -30,4 +31,4 @@ class GameServiceTest(unittest.TestCase):
 
         self.assertEqual(correct_answers + wrong_answers,
                          len(self.game.player_repository.get_player(player_id).challenges_faced))
-        self.assertEqual(correct_answers, self.game.get_player_score(player_id))
+        self.assertEqual(correct_answers, self.game.get_player_score(player_id)['player_score'])

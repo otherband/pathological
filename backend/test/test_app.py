@@ -19,16 +19,17 @@ class AppTest(unittest.TestCase):
     def test_scenario(self):
         session_id_response = self.app.post("/api/v1/new-session-id")
         self.assertOkay(session_id_response)
-        self.assertGreater(len(session_id_response.text), 10)
+        player_id = session_id_response.json['player_id']
+        self.assertGreater(len(player_id), 10)
 
         challenge_response = self.post_with_body("api/v1/request-challenge",
-                                                 {"player_id": session_id_response.text})
+                                                 {"player_id": player_id})
         self.assertOkay(challenge_response)
         self.assertTrue("challenge_id" in challenge_response.json)
 
         solution_response = self.post_with_body("/api/v1/solve-challenge",
                                                 {
-                                                    "player_id": session_id_response.text,
+                                                    "player_id": player_id,
                                                     "challenge_key": challenge_response.json["challenge_id"],
                                                     "answer": "ANY"})
         self.assertOkay(solution_response)
@@ -37,7 +38,7 @@ class AppTest(unittest.TestCase):
         self.assertOkay(image_response)
         self.assertEqual(image_response.content_type, "image/png")
 
-        score = self.app.get(f"/api/v1/score/{session_id_response.text}")
+        score = self.app.get(f"/api/v1/score/{player_id}")
         self.assertOkay(score)
         self.assertTrue("player_score" in score.json)
         self.assertTrue("player_id" in score.json)

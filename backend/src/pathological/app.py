@@ -44,11 +44,7 @@ def get_image(image_id: str):
 
 @app.route(endpoint("/score/<player_id>"))
 def get_score(player_id: str):
-    score = game_service.get_player_score(player_id)
-    return {
-        "player_id": player_id,
-        "player_score": score
-    }
+    return game_service.get_player_score(player_id)
 
 
 @app.route("/actuator/health")

@@ -22,7 +22,7 @@ class GameServiceTest(unittest.TestCase):
 
         for i in range(correct_answers):
             challenge = self.game.request_challenge(player_id)
-            self.game.solve_challenge(player_id, challenge.challenge_id, challenge.challenge_id)
+            self.game.solve_challenge(player_id, challenge.challenge_id, "death")
         wrong_answers = 10
         for j in range(wrong_answers):
             challenge = self.game.request_challenge(player_id)

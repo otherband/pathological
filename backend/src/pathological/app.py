@@ -40,6 +40,7 @@ def solve_challenge():
 def get_image(image_id: str):
     response = make_response(image_service.get_image_by_id(image_id=image_id))
     response.headers["Content-Type"] = "image/png"
+
     return response
 
 

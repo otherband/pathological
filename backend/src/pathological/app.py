@@ -24,6 +24,7 @@ def start_session():
 @app.route(endpoint("/request-challenge"), methods=["POST"])
 def request_challenge():
     data = request.json
+    print(f"Received {data}")
     challenge = game_service.request_challenge(data["player_id"])
     return _to_response(challenge)
 
@@ -31,7 +32,7 @@ def request_challenge():
 @app.route(endpoint("/solve-challenge"), methods=["POST"])
 def solve_challenge():
     data = request.json
-    game_service.solve_challenge(data["player_id"], data["challenge_key"], data["answer"])
+    game_service.solve_challenge(data["player_id"], data["challenge_id"], data["answer"])
     return '', 200
 
 

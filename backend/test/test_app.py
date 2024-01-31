@@ -30,7 +30,7 @@ class AppTest(unittest.TestCase):
         solution_response = self.post_with_body("/api/v1/solve-challenge",
                                                 {
                                                     "player_id": player_id,
-                                                    "challenge_key": challenge_response.json["challenge_id"],
+                                                    "challenge_id": challenge_response.json["challenge_id"],
                                                     "answer": "ANY"})
         self.assertOkay(solution_response)
 

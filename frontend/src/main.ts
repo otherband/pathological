@@ -4,7 +4,8 @@ let playerId: string;
 const urlCreator = window.URL || window.webkitURL;
 
 async function startGame() {
-  playerId = await gameController.getPlayerId();
+  playerId = (await gameController.getPlayerId())['player_id'];
+  console.log(`Received playerId ${playerId}`)
   document
     .getElementById("start-game-div")
     .setAttribute("style", "display: none");

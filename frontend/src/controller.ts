@@ -2,12 +2,12 @@ import { hostApi } from "./config";
 const BASE_URL = hostApi.concat("/api/v1");
 
 class GameController {
-  async getPlayerId(): Promise<string> {
+  async getPlayerId(): Promise<object> {
     return await (
       await fetch(BASE_URL.concat("/new-session-id"), {
         method: "POST",
       })
-    ).text();
+    ).json();
   }
 
   async getChallengeImage(imageId: string): Promise<Blob> {
@@ -36,20 +36,18 @@ class GameController {
     playerId: string,
     challenge_key: string,
     answer: string
-  ): Promise<string> {
-    return await (
-      await fetch(BASE_URL.concat("/solve-challenge"), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          player_id: playerId,
-          challenge_key: challenge_key,
-          answer: answer,
-        }),
-      })
-    ).text();
+  ): Promise<Response> {
+    return await fetch(BASE_URL.concat("/solve-challenge"), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        player_id: playerId,
+        challenge_id: challenge_key,
+        answer: answer,
+      }),
+    });
   }
 
   async getScore(playerId: string): Promise<object> {

@@ -1,7 +1,7 @@
 import time
 import uuid
 
-from pathological.game_domain.challenge_repository import ChallengeRepository, DummyChallengeRepository
+from pathological.challenges.challenge_repository import ChallengeRepository, DummyChallengeRepository
 from pathological.game_domain.player_repository import EmbeddedPlayerSessionRepository, PlayerSessionRepository
 from pathological.models.game_models import Challenge, PlayerSession
 
@@ -13,10 +13,7 @@ class GameService:
         self.challenge_repository = challenge_repository
 
     def register_new_player(self) -> dict:
-        player = PlayerSession(player_id=str(uuid.uuid4()),
-                               challenges_faced=set(),
-                               challenges_solved=set(),
-                               timestamp_start=time.time())
+        player = self._create_new_player()
         self.player_repository.add_player_session(player)
         return {"player_id": player.player_id}
 
@@ -35,14 +32,22 @@ class GameService:
 
     def get_player_score(self, player_id: str) -> dict:
         return {"player_id": player_id,
-                "player_score": len(self.player_repository.get_player(player_id).challenges_solved)}
+                "player_score": self._get_score(player_id)}
 
-    def _remove_answer(self, challenge: Challenge):
-        response_challenge = Challenge(challenge_id=challenge.challenge_id,
-                                       correct_answer="",
-                                       possible_answers=challenge.possible_answers,
-                                       image_id=challenge.image_id)
-        return response_challenge
+    def _create_new_player(self) -> PlayerSession:
+        return PlayerSession(player_id=str(uuid.uuid4()),
+                             challenges_faced=set(),
+                             challenges_solved=set(),
+                             timestamp_start=time.time())
+
+    def _remove_answer(self, challenge: Challenge) -> Challenge:
+        return Challenge(challenge_id=challenge.challenge_id,
+                         correct_answer="",
+                         possible_answers=challenge.possible_answers,
+                         image_id=challenge.image_id)
 
     def _get_answer(self, challenge_key):
         return self.challenge_repository.get_challenge_by_id(challenge_key).correct_answer
+
+    def _get_score(self, player_id: str) -> int:
+        return len(self.player_repository.get_player(player_id).challenges_solved)

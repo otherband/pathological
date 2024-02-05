@@ -10,8 +10,11 @@ from pathological.models.game_models import Challenge
 class PandasChallengeRepository(ChallengeRepository):
     def __init__(self, dataset_name: str):
         self._dataframe = grab_dataset_dataframe(dataset_name)
+        self._validate_dataframe()
 
     def get_random_challenge(self, excluded: List[str] = None) -> Challenge:
+        if excluded is None:
+            excluded = []
         without_excluded = self._dataframe.drop(labels=excluded)
         challenge_series = without_excluded.sample(1).iloc[0]
         return self._to_challenge(challenge_series)
@@ -23,10 +26,14 @@ class PandasChallengeRepository(ChallengeRepository):
     def get_random_batch(self, batch_size: int, excluded: List[str] = None) -> List[Challenge]:
         if excluded is None:
             excluded = []
-        return [self._to_challenge(series) for series in self._dataframe.drop(excluded).sample(batch_size)]
+        return [self._to_challenge(row[1]) for row in self._dataframe.drop(excluded).sample(batch_size).iterrows()]
 
     def _to_challenge(self, challenge_series: pd.Series):
         return Challenge(challenge_id=str(challenge_series.name),
                          correct_answer=challenge_series['correct_answer'],
                          image_path=challenge_series['image_path'],
                          possible_answers=set(challenge_series['possible_answers'].split(";")))
+
+    def _validate_dataframe(self):
+        assert type(self._dataframe) is pd.DataFrame
+        assert set(self._dataframe.columns) == {"possible_answers", "correct_answer", "image_path"}

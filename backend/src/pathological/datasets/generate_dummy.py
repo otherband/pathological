@@ -15,7 +15,7 @@ def generate_dummy():
          }
         for _ in range(1000)
     ]
-    dataframe = pd.DataFrame.from_records(dummy_records)
+    dataframe = pd.DataFrame.from_records(dummy_records, index="challenge_id")
     dataframe.to_csv(grab_csv_path("dummy"))
 
 

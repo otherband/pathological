@@ -10,9 +10,9 @@ class GameController {
     ).json();
   }
 
-  async getChallengeImage(imageId: string): Promise<Blob> {
+  async getChallengeImage(challengeId: string): Promise<Blob> {
     return await (
-      await fetch(BASE_URL.concat(`/image/${imageId}`), {
+      await fetch(BASE_URL.concat(`/image/${challengeId}`), {
         method: "GET",
       })
     ).blob();

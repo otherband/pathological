@@ -72,7 +72,7 @@ function textDiv(answerText: string): HTMLDivElement {
 function createChallengeImageDiv(challenge: object): HTMLDivElement {
   const imageDiv = document.createElement("div");
   const imageElement: HTMLImageElement = document.createElement("img");
-  gameController.getChallengeImage(challenge["image_id"]).then((blob) => {
+  gameController.getChallengeImage(challenge["challenge_id"]).then((blob) => {
     imageElement.src = urlCreator.createObjectURL(blob);
     imageElement.classList.add("challenge-img");
   });

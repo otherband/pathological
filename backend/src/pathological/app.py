@@ -2,14 +2,14 @@ import attrs
 from flask import Flask, request, make_response
 from flask_cors import CORS
 
+from pathological.challenges.challenge_repository import DummyChallengeRepository
+from pathological.challenges.challenge_service import ChallengeService
 from pathological.game_domain.game_service import GameService
-from pathological.images.image_service import ImageService
-from pathological.models.game_models import Challenge
 
 app = Flask(__name__)
 CORS(app)
-game_service = GameService()
-image_service = ImageService()
+challenge_service = ChallengeService(DummyChallengeRepository())
+game_service = GameService(challenge_service=challenge_service)
 
 
 def endpoint(suffix):
@@ -26,7 +26,8 @@ def request_challenge():
     data = request.json
     print(f"Received {data}")
     challenge = game_service.request_challenge(data["player_id"])
-    return _to_response(challenge)
+    # noinspection PyTypeChecker
+    return attrs.asdict(challenge)
 
 
 @app.route(endpoint("/solve-challenge"), methods=["POST"])
@@ -36,9 +37,9 @@ def solve_challenge():
     return '', 200
 
 
-@app.route(endpoint("/image/<image_id>"))
-def get_image(image_id: str):
-    response = make_response(image_service.get_image_by_id(image_id=image_id))
+@app.route(endpoint("/image/<challenge_id>"))
+def get_image(challenge_id: str):
+    response = make_response(challenge_service.get_image_by(challenge_id=challenge_id))
     response.headers["Content-Type"] = "image/png"
     return response
 
@@ -53,14 +54,6 @@ def health():
     return {
         "status": "UP"
     }
-
-
-def _to_response(challenge):
-    # noinspection PyTypeChecker
-    return attrs.asdict(Challenge(challenge_id=challenge.challenge_id,
-                                  image_id=challenge.image_id,
-                                  correct_answer=challenge.correct_answer,
-                                  possible_answers=list(challenge.possible_answers)))
 
 
 if __name__ == "__main__":

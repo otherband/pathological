@@ -1,7 +1,7 @@
 import time
 import uuid
 
-from pathological.challenges.challenge_repository import PandasChallengeRepository
+from pathological.challenges.pandas_challenge_repo import PandasChallengeRepository
 from pathological.challenges.challenge_service import ChallengeService
 from pathological.game_domain.player_repository import EmbeddedPlayerSessionRepository, PlayerSessionRepository
 from pathological.models.game_models import PlayerSession, ChallengeResponse

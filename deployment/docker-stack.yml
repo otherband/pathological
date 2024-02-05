@@ -1,0 +1,24 @@
+version: "3.8"
+services:
+  frontend:
+    deploy:
+      restart_policy:
+        condition: any
+        delay: 10s
+    image: github.com/otherband/pathological-frontend
+    ports:
+      - "8080:80"
+  backend:
+    hostname: backend
+    ports:
+      - "5000:5000"
+    image: github.com/otherband/pathological-backend
+    environment:
+      - APP_HOSTNAME=optimization-app
+    deploy:
+      restart_policy:
+        condition: any
+        delay: 10s
+    healthcheck:
+      test: curl --fail optimization-app:8080/actuator/health || exit 1
+      interval: 10s

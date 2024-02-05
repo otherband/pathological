@@ -1,0 +1,12 @@
+version: "3.8"
+services:
+  backend:
+    image: github.com/otherband/pathological-backend
+    build:
+      context: ./
+      dockerfile: deployment/backend.dockerfile
+  frontend:
+    image: github.com/otherband/pathological-frontend
+    build:
+      context: ./
+      dockerfile: deployment/frontend.dockerfile

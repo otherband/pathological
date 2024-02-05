@@ -10,8 +10,6 @@ services:
       - "8080:80"
   backend:
     hostname: backend
-    ports:
-      - "5000:5000"
     image: github.com/otherband/pathological-backend
     entrypoint: sh ./run_backend.sh
     environment:
@@ -27,3 +25,6 @@ services:
     healthcheck:
       test: curl --fail backend:5000/actuator/health || exit 1
       interval: 10s
+    ports:
+      - "5000:5000"
+

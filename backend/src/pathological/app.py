@@ -2,13 +2,13 @@ import attrs
 from flask import Flask, request, make_response
 from flask_cors import CORS
 
-from pathological.challenges.challenge_repository import DummyChallengeRepository
+from pathological.challenges.challenge_repository import PandasChallengeRepository
 from pathological.challenges.challenge_service import ChallengeService
 from pathological.game_domain.game_service import GameService
 
 app = Flask(__name__)
 CORS(app)
-challenge_service = ChallengeService(DummyChallengeRepository())
+challenge_service = ChallengeService(PandasChallengeRepository("dummy"))
 game_service = GameService(challenge_service=challenge_service)
 
 

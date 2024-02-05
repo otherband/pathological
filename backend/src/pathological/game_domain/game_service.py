@@ -1,7 +1,7 @@
 import time
 import uuid
 
-from pathological.challenges.challenge_repository import DummyChallengeRepository
+from pathological.challenges.challenge_repository import PandasChallengeRepository
 from pathological.challenges.challenge_service import ChallengeService
 from pathological.game_domain.player_repository import EmbeddedPlayerSessionRepository, PlayerSessionRepository
 from pathological.models.game_models import PlayerSession, ChallengeResponse
@@ -9,7 +9,7 @@ from pathological.models.game_models import PlayerSession, ChallengeResponse
 
 class GameService:
     def __init__(self, player_repository: PlayerSessionRepository = EmbeddedPlayerSessionRepository(),
-                 challenge_service: ChallengeService = ChallengeService(DummyChallengeRepository())):
+                 challenge_service: ChallengeService = ChallengeService(PandasChallengeRepository("dummy"))):
         self.player_repository = player_repository
         self.challenge_service = challenge_service
 

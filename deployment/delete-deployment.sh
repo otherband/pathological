@@ -1,0 +1,2 @@
+docker service rm pathological_backend pathological_frontend
+docker network rm pathological_default

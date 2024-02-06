@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   backend:
-    image: jyguru/pathological/pathological-backend
+    image: jyguru/pathological-backend
     entrypoint: sh ./run_backend.sh
     environment:
       - APP_HOSTNAME=0.0.0.0
@@ -23,7 +23,7 @@ services:
       restart_policy:
         condition: any
         delay: 10s
-    image: jyguru/pathological/pathological-frontend
+    image: jyguru/pathological-frontend
     ports:
       - "8080:80"
 

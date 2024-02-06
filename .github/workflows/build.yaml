@@ -2,7 +2,7 @@ name: Build
 
 on:
   push:
-    branches: [ master, '3' ]
+    branches: [ master ]
   pull_request:
     branches: [ master ]
   workflow_dispatch:
@@ -49,11 +49,11 @@ jobs:
       - name: Build
         run: npm run build -- --mode=production
   build-docker-images:
-#    if: ${{ github.event.inputs.DOCKER_STAGE == 'true' }}
+    if: ${{ github.event.inputs.DOCKER_STAGE == 'true' }}
     needs: ['build-backend', 'build-frontend']
     runs-on: ubuntu-latest
     env:
-      RELEASE_TAG: "latest"
+      RELEASE_TAG: "${{ github.event.inputs.RELEASE_TAG }}"
     steps:
       - uses: actions/checkout@v4
       - name: Set up Docker Compose

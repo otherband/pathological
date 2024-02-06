@@ -49,7 +49,7 @@ jobs:
       - name: Build
         run: npm run build -- --mode=production
   build-docker-images:
-    if: "${{github.event.inputs.DOCKER_STAGE}}" == 'true'
+    if: ${{ github.event.inputs.DOCKER_STAGE == 'true' }}
     needs: ['build-backend', 'build-frontend']
     runs-on: ubuntu-latest
     env:

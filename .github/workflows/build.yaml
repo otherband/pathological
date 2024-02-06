@@ -49,7 +49,7 @@ jobs:
       - name: Build
         run: npm run build -- --mode=production
   build-docker-images:
-    if: "{{github.event.inputs.DOCKER_STAGE}}"
+    if: "${{github.event.inputs.DOCKER_STAGE}}"
     runs-on: ubuntu-latest
     env:
       RELEASE_TAG: "${{ github.event.inputs.RELEASE_TAG }}"

@@ -1,12 +1,12 @@
 version: "3.8"
 services:
   backend:
-    image: github.com/otherband/pathological-backend
+    image: jyguru/pathological/pathological-backend:${RELEASE_TAG}
     build:
       context: ./
       dockerfile: deployment/backend.dockerfile
   frontend:
-    image: github.com/otherband/pathological-frontend
+    image: jyguru/pathological/pathological-frontend:${RELEASE_TAG}
     build:
       context: ./
       dockerfile: deployment/frontend.dockerfile

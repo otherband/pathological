@@ -15,3 +15,9 @@ class PlayerSession:
     challenges_faced: {str}
     challenges_solved: {str}
     timestamp_start: float
+
+
+@define
+class MultiplayerGame:
+    game_id: str
+    connected_players: [PlayerSession]

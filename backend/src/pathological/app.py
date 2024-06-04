@@ -1,17 +1,19 @@
 import attrs
 from flask import Flask, request, make_response
 from flask_cors import CORS
+from flask_socketio import SocketIO, emit
 
 from pathological.game_domain.game_service import GameService
+from pathological.game_domain.multiplayer_game_repository import EmbeddedMultiplayerGameRepository
 from pathological.images.image_service import ImageService
-from pathological.models.game_models import Challenge
-from flask_socketio import SocketIO
+from pathological.models.game_models import Challenge, MultiplayerGame
 
 app = Flask(__name__)
 CORS(app)
 game_service = GameService()
 image_service = ImageService()
-app_with_sockets = SocketIO(app)
+multiplayer_game_repository = EmbeddedMultiplayerGameRepository()
+app_with_sockets = SocketIO(app, cors_allowed_origins="*")
 
 
 def endpoint(suffix):
@@ -50,13 +52,31 @@ def get_score(player_id: str):
     return game_service.get_player_score(player_id)
 
 
-
-
 @app.route("/actuator/health")
 def health():
     return {
         "status": "UP"
     }
+
+
+@app_with_sockets.on("client_join_game")
+def client_join_game(event_data: dict):
+    requested_game_id = event_data["game_id"]
+    game = multiplayer_game_repository.get_game(requested_game_id)
+    player = game_service.register_new_player()
+    if game is None:
+        game = MultiplayerGame(game_id=requested_game_id, connected_players=[
+            player
+        ])
+    else:
+        game.connected_players.append(player)
+
+    multiplayer_game_repository.update_game(game)
+
+    emit(f"successful_join_{event_data['user_id']}", {
+        "game_id": requested_game_id,
+        "player_id": player["player_id"]
+    })
 
 
 def _to_response(challenge):

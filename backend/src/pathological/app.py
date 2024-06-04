@@ -5,11 +5,13 @@ from flask_cors import CORS
 from pathological.game_domain.game_service import GameService
 from pathological.images.image_service import ImageService
 from pathological.models.game_models import Challenge
+from flask_socketio import SocketIO
 
 app = Flask(__name__)
 CORS(app)
 game_service = GameService()
 image_service = ImageService()
+app_with_sockets = SocketIO(app)
 
 
 def endpoint(suffix):
@@ -48,6 +50,8 @@ def get_score(player_id: str):
     return game_service.get_player_score(player_id)
 
 
+
+
 @app.route("/actuator/health")
 def health():
     return {
@@ -64,4 +68,4 @@ def _to_response(challenge):
 
 
 if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+    app_with_sockets.run(app, port=5000, debug=True)

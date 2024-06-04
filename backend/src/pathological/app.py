@@ -63,20 +63,30 @@ def health():
 def client_join_game(event_data: dict):
     requested_game_id = event_data["game_id"]
     game = multiplayer_game_repository.get_game(requested_game_id)
-    player = game_service.register_new_player()
+    player = game_service.register_new_named_player(event_data["player_id"])
     if game is None:
         game = MultiplayerGame(game_id=requested_game_id, connected_players=[
             player
         ])
     else:
+        print(f"Player {player} joined ")
         game.connected_players.append(player)
 
     multiplayer_game_repository.update_game(game)
 
-    emit(f"successful_join_{event_data['user_id']}", {
+    emit_event(f"successful_join_{requested_game_id}", {
         "game_id": requested_game_id,
         "player_id": player["player_id"]
     })
+    emit_event(f"new_player_joined_{requested_game_id}", {
+        "game_id": requested_game_id,
+        "player_id": player["player_id"]
+    })
+
+
+def emit_event(event_id: str, event_body: dict, namespace="/"):
+    print(f"Emitting event {event_id} with body {event_body} ")
+    emit(event_id, event_body, namespace=namespace)
 
 
 def _to_response(challenge):

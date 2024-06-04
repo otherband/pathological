@@ -13,7 +13,10 @@ class GameService:
         self.challenge_repository = challenge_repository
 
     def register_new_player(self) -> dict:
-        player = PlayerSession(player_id=str(uuid.uuid4()),
+        return self.register_new_named_player(name=str(uuid.uuid4()))
+
+    def register_new_named_player(self, name: str) -> dict:
+        player = PlayerSession(player_id=name,
                                challenges_faced=set(),
                                challenges_solved=set(),
                                timestamp_start=time.time())

@@ -1,4 +1,4 @@
-import { io } from "socket.io-client";
+import { Socket, io } from "socket.io-client";
 import { hostApi } from "./config";
 import { MutliplayerController } from "./multiplayer_controller";
 
@@ -32,7 +32,7 @@ function initMultiplayerGame(controllerFunction: (gameId: string, playerName: st
     } else {
         const playerName = formData.get("player-name").toString();
         const lobbyId = formData.get("lobby-id").toString();
-        preInitializeListener(lobbyId);
+        const socket = preInitializeListener(lobbyId, playerName);
         controllerFunction(
             lobbyId,
             playerName
@@ -40,28 +40,44 @@ function initMultiplayerGame(controllerFunction: (gameId: string, playerName: st
             const responseDiv = document.getElementById("multiplayer-game-init-error-response-div");
             resetDiv(responseDiv);
             if (response.status != 200) {
-                response.json().then((responseJson) => {
-                    console.log(`Response JSON: ` + JSON.stringify(responseJson))
-                    responseDiv.innerText = errorMessagePrefix + responseJson["errorMessage"];
-                });
+
+                showFailureMessage(response, responseDiv, errorMessagePrefix);
+                socket.disconnect();
+
             } else {
+
                 response.json()
-                .then((responseJson) => {
-                    joinLobby();
-                    updateLobby(responseJson["gameId"], responseJson);
-                })
-          
+                    .then((responseJson) => {
+                        joinLobby();
+                        updateLobby(responseJson["gameId"], responseJson);
+                    })
+
             }
         });
     }
 }
+function showFailureMessage(response: Response, responseDiv: HTMLElement, errorMessagePrefix: string) {
+    response.json().then((responseJson) => {
+        console.log(`Response JSON: ` + JSON.stringify(responseJson));
+        responseDiv.innerText = errorMessagePrefix + responseJson["errorMessage"];
+    });
+}
+
 function joinLobby() {
     showLobby();
     hideInitDiv();
 }
 
-function preInitializeListener(gameId: string) {
-    const socket = io(hostApi);
+function preInitializeListener(gameId: string, playerId: string): Socket {
+    const socket = io(hostApi, {
+        "query": {
+            "player_id": playerId,
+            "game_id": gameId
+        }
+    });
+    
+
+
     socket.on("player_join_event", (eventData) => {
 
         if (gameId === eventData["game_id"]) {
@@ -74,6 +90,20 @@ function preInitializeListener(gameId: string) {
         }
 
     })
+
+    socket.on("player_left_game", (eventData) => {
+
+        if (gameId === eventData["game_id"]) {
+            console.log("Recieved relevant player left event!");
+            console.log("Updating lobby!");
+            hideInitDiv();
+            updateLobby(gameId, eventData);
+        } else {
+            console.log("Recieved irrelevant player join event!");
+        }
+    })
+
+    return socket;
 }
 
 function updateLobby(gameId: string, hasAllPlayers: object) {

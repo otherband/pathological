@@ -14,11 +14,16 @@ class MultiplayerGameRepository(metaclass=ABCMeta):
         pass
 
     @abstractmethod
+    def delete_game(self, game_id: str):
+        pass
+
+    @abstractmethod
     def exists(self, game_id: str):
         pass
 
 
 class EmbeddedMultiplayerGameRepository(MultiplayerGameRepository):
+
     def __init__(self):
         self.all_games = {}
 
@@ -30,3 +35,6 @@ class EmbeddedMultiplayerGameRepository(MultiplayerGameRepository):
 
     def update_game(self, game: MultiplayerGame):
         self.all_games[game.game_id] = game
+
+    def delete_game(self, game_id: str):
+        self.all_games.pop(game_id)

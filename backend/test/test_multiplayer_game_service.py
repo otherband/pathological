@@ -46,3 +46,17 @@ class MultiplayerGameServiceTest(unittest.TestCase):
             "game_id": "game_2",
             "connected_players": ["player_1", "player_2"]
         }, latest_event["event_data"])
+
+    def test_leave_game(self):
+        self.game_service.create_game("game13", "player1")
+        self.game_service.join_game("game13", "player2")
+        updated_game = self.game_service.leave_game("game13", "player2")
+        self.assertEquals(["player1"], updated_game.connected_players)
+
+        latest_event = self.event_dispatcher.dispatched_events[-1]
+        self.assertEquals("player_left_game", latest_event["event_name"])
+        self.assertEquals({
+            "game_id": "game13",
+            "player_id": "player2",
+            "connected_players": ["player1"]
+        }, latest_event["event_data"])

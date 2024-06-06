@@ -5,6 +5,7 @@ from flask_socketio import SocketIO
 
 from pathological.app_error_handler import register_error_handlers
 from pathological.events.WebSocketsEventDispatcher import WebSocketsEventDispatcher
+from pathological.events.connections_repository import EmbeddedConnectionRepository, ConnectionRepository
 from pathological.game_domain.game_service import GameService
 from pathological.game_domain.multiplayer_game_repository import EmbeddedMultiplayerGameRepository
 from pathological.game_domain.multiplayer_game_service import MultiplayerGameService
@@ -20,8 +21,9 @@ app_with_sockets = SocketIO(app, cors_allowed_origins="*")
 
 game_service = GameService()
 image_service = ImageService()
-multiplayer_game_service = MultiplayerGameService(event_dispatcher=WebSocketsEventDispatcher())
-multiplayer_game_repository = EmbeddedMultiplayerGameRepository()
+event_dispatcher = WebSocketsEventDispatcher()
+multiplayer_game_service = MultiplayerGameService(event_dispatcher=event_dispatcher)
+connection_repository: ConnectionRepository = EmbeddedConnectionRepository()
 
 
 def endpoint(suffix):
@@ -72,6 +74,27 @@ def join_multiplayer_game():
     json = request.json
     game = multiplayer_game_service.join_game(game_id=json["game_id"], player_id=json["player_id"])
     return attrs.asdict(game)
+
+
+@app_with_sockets.on("connect")
+def new_connection():
+    print(f"New connection established [{request.sid}] with data [{request.args}]!")
+    connection_repository.add_connection(
+        request.sid,
+        {
+            "player_id": request.args["player_id"],
+            "game_id": request.args["game_id"]
+        }
+    )
+
+
+@app_with_sockets.on("disconnect")
+def remove_from_game():
+    connection_id = request.sid
+    print(f"Connection terminated {connection_id}")
+    player_data = connection_repository.remove_connection(connection_id)
+    multiplayer_game_service.leave_game(game_id=player_data["game_id"],
+                                        player_id=player_data["player_id"])
 
 
 @app.route("/actuator/health")

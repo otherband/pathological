@@ -30,10 +30,18 @@
       </div>
 
       <br>
-      <button class="btn btn-danger m-2" type="button" onclick="startMultiplayerGame()">
+      <button class="btn btn-danger m-2" type="button" onclick="createMultiplayerGame()">
         Start multiplayer game
       </button>
+      <button class="btn btn-danger m-2" type="button" onclick="joinMultiplayerGame()">
+        Join multiplayer game
+      </button>
     </form>
+
+    <div id="multiplayer-game-init-error-response-div">
+
+    </div>
+
   </div>
 
   <div class="container w-50" id="mutliplayer-lobby-div" style="display: none;">

@@ -2,8 +2,8 @@ import { hostApi } from "./config";
 
 const BASE_URL = hostApi.concat("/api/v1");
 
-class MutliplayerController {
-    async createGame(gameId: string, playerId: string) {
+export class MutliplayerController {
+    async createGame(gameId: string, playerId: string): Promise<Response> {
         return await (
             await fetch(BASE_URL.concat("/multiplayer/game"), {
                 method: "POST",
@@ -15,10 +15,10 @@ class MutliplayerController {
                     game_id: gameId
                 }),
             })
-        ).json();
+        );
     }
 
-    async joinGame(gameId: string, playerId: string) {
+    async joinGame(gameId: string, playerId: string): Promise<Response> {
         return await (
             await fetch(BASE_URL.concat("/multiplayer/game/join"), {
                 method: "PUT",
@@ -30,7 +30,7 @@ class MutliplayerController {
                     game_id: gameId
                 }),
             })
-        ).json();
+        );
     }
 
 }

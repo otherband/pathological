@@ -34,7 +34,8 @@ class MultiplayerGameService:
         self._game_repository.update_game(game)
         self._event_dispatcher.dispatch("player_join_event", {
             "player_id": player_id,
-            "game_id": game_id
+            "game_id": game_id,
+            "connected_players": game.connected_players
         })
         return game
 

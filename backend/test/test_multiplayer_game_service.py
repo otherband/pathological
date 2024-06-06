@@ -43,5 +43,6 @@ class MultiplayerGameServiceTest(unittest.TestCase):
         self.assertEquals("player_join_event", latest_event["event_name"])
         self.assertEquals({
             "player_id": "player_2",
-            "game_id": "game_2"
+            "game_id": "game_2",
+            "connected_players": ["player_1", "player_2"]
         }, latest_event["event_data"])

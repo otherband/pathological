@@ -1,4 +1,5 @@
 import { GameController } from "./controller";
+import { createMultiplayerGame, joinMultiplayerGame } from "./multiplayer_logic";
 import { sendJoinGameEvent } from "./socket_controller";
 const gameController: GameController = new GameController();
 let playerId: string;
@@ -106,23 +107,8 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function startMultiplayerGame() {
-
-  const form = document.getElementById("start-multiplayer-game-form") as HTMLFormElement;
-  const formData = new FormData(form);
-
-  if (!form.checkValidity()) {
-    form.reportValidity();
-  } else {
-    const playerName = formData.get("player-name").toString();
-    const lobbyId = formData.get("lobby-id").toString();
-    sendJoinGameEvent(playerName, lobbyId);
-  }
-
-}
-
 function showStartMultiplayerDiv() {
   document.getElementById("start-mutliplayer-game-div").setAttribute("style", "display: block")
 }
 
-export { startGame, startMultiplayerGame, showStartMultiplayerDiv };
+export { startGame, createMultiplayerGame, joinMultiplayerGame, showStartMultiplayerDiv };

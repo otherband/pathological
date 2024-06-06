@@ -20,4 +20,10 @@ class PlayerSession:
 @define
 class MultiplayerGame:
     game_id: str
-    connected_players: [PlayerSession]
+    connected_players: [str]
+
+
+@define
+class PlayerJoinEvent:
+    player_id: str
+    game_id: str

@@ -3,19 +3,10 @@ import { hostApi } from "./config";
 
 
 const CLIENT_JOIN_GAME = "client_join_game"
-const NEW_PLAYER_JOINED = "notify_join_game";
+const NEW_PLAYER_JOINED = "new_player_joined";
+const SUCCESSFUL_JOIN = "successful_join";
+const LOBBY_DIV = "mutliplayer-lobby-div";
 
-function getNewPlayerJoinedEventId(gameId: string) {
-    return `new_player_joined`
-}
-
-function getSuccessfulJoinEventId(gameId: string) {
-    return `successful_join`
-}
-
-function getStartGameEventId(gameId: string) {
-    return `start_game_${gameId}`;
-}
 
 export function sendJoinGameEvent(playerName: string, gameId: string) {
 
@@ -23,7 +14,7 @@ export function sendJoinGameEvent(playerName: string, gameId: string) {
     socket.connect();
 
     registerListeners(gameId, socket);
-    handleUiElements();
+    showLobbyDiv();
 
     socket.emit(CLIENT_JOIN_GAME, {
         game_id: gameId,
@@ -33,38 +24,41 @@ export function sendJoinGameEvent(playerName: string, gameId: string) {
 }
 
 function registerListeners(gameId: string, socket: Socket) {
-    const successfulJoinEvent: string = getSuccessfulJoinEventId(gameId);
 
-    console.log(`Registering listener for ${successfulJoinEvent}`)
-
-    socket.on(successfulJoinEvent, (event_data: object) => {
+    socket.once(SUCCESSFUL_JOIN, (event_data: object) => {
         console.log("Recieved successful join event!");
-
-        
         const gameId = event_data["game_id"];
-
-        socket.on(getNewPlayerJoinedEventId(gameId), (event_data: object) => {
-            console.log(`Recieved new player joined event ${JSON.stringify(event_data)}`)
-            const listOfPlayers = document.getElementById("connected-players-list");
-            const newPlayerListElement = document.createElement("li");
-            newPlayerListElement.innerText = `Player with ID ${event_data['player_id']}}`;
-            listOfPlayers.appendChild(newPlayerListElement);
-        })
-
-        socket.on(getStartGameEventId(gameId), (event_data: object) => {
-
-        })
-
-        // stopListening(socket, successfulJoinEvent);
+        registerNewPlayerListener(socket, gameId);
     });
 }
 
-function stopListening(socket: Socket, eventName: string) {
-    socket.on(eventName, () => {
+function registerNewPlayerListener(socket, gameId: any) {
+    socket.on(NEW_PLAYER_JOINED, (event_data: object) => {
+        console.log("Reieved new player joined event!");
+        if (event_data["game_id"] == gameId) {
+            console.log("Game ID matches!");
+            const playersList: Array<string> = event_data["all_players"];
+            playersList.forEach(player => {
+                const listOfPlayers = document.getElementById("connected-players-list");
+                resetInnerContent(listOfPlayers);
+                listOfPlayers.appendChild(buildPlayerListElement(event_data));
+            });
+        }
     });
 }
-function handleUiElements() {
-    const lobbyDiv = document.getElementById("mutliplayer-lobby-div");
+
+function buildPlayerListElement(event_data: object) {
+    const newPlayerListElement = document.createElement("li");
+    newPlayerListElement.innerText = `Player with ID ${event_data['player_id']}}`;
+    return newPlayerListElement;
+}
+
+function resetInnerContent(htmlElement: HTMLElement) {
+    htmlElement.innerHTML = "";
+}
+
+function showLobbyDiv() {
+    const lobbyDiv = document.getElementById(LOBBY_DIV);
     lobbyDiv.setAttribute("style", "display: block");
 }
 

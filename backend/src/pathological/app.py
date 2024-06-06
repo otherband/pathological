@@ -1,17 +1,22 @@
 import attrs
 from flask import Flask, request, make_response
 from flask_cors import CORS
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO
 
+from pathological.events.WebSocketsEventDispatcher import WebSocketsEventDispatcher
 from pathological.game_domain.game_service import GameService
 from pathological.game_domain.multiplayer_game_repository import EmbeddedMultiplayerGameRepository
+from pathological.game_domain.multiplayer_game_service import MultiplayerGameService
 from pathological.images.image_service import ImageService
-from pathological.models.game_models import Challenge, MultiplayerGame
+from pathological.models.game_models import Challenge
+
+SUCCESSFUL_JOIN = "successful_join"
 
 app = Flask(__name__)
 CORS(app)
 game_service = GameService()
 image_service = ImageService()
+multiplayer_game_service = MultiplayerGameService(event_dispatcher=WebSocketsEventDispatcher())
 multiplayer_game_repository = EmbeddedMultiplayerGameRepository()
 app_with_sockets = SocketIO(app, cors_allowed_origins="*")
 
@@ -52,48 +57,27 @@ def get_score(player_id: str):
     return game_service.get_player_score(player_id)
 
 
+@app.route(endpoint("/multiplayer/game"), methods=["POST"])
+def create_multiplayer_game():
+    json = request.json
+    return multiplayer_game_service.create_game(
+        player_id=json["player_id"],
+        game_id=json["game_id"]
+    )
+
+
+@app.route(endpoint("/multiplayer/game/join"), methods=["PUT"])
+def join_multiplayer_game():
+    json = request.json
+    return multiplayer_game_service.join_game(game_id=json["game_id"],
+                                              player_id=json["player_id"])
+
+
 @app.route("/actuator/health")
 def health():
     return {
         "status": "UP"
     }
-
-
-@app_with_sockets.on("client_join_game")
-def client_join_game(event_data: dict):
-    requested_game_id = event_data["game_id"]
-    game = multiplayer_game_repository.get_game(requested_game_id)
-    player = game_service.register_new_named_player(event_data["player_id"])
-    if game is None:
-        print(f"Creating game with ID {requested_game_id}")
-        game = MultiplayerGame(game_id=requested_game_id, connected_players=[
-            player
-        ])
-        emit("successful_join", {
-            "game_id": requested_game_id,
-            "player_id": player["player_id"]
-        })
-
-    else:
-        if player["player_id"] not in [_player["player_id"] for _player in game.connected_players]:
-            game.connected_players.append(player)
-            emit("successful_join", {
-                "game_id": requested_game_id,
-                "player_id": player["player_id"]
-            })
-            emit_event(f"new_player_joined", {
-                "game_id": requested_game_id,
-                "player_id": player["player_id"]
-            })
-            print(f"Player {player} joined ")
-        else:
-            print("Failed to join: already joined")
-
-    multiplayer_game_repository.update_game(game)
-
-
-def emit_event(event_id: str, event_body: dict, global_evnet=True):
-    emit(event_id, event_body, broadcast=global_evnet, include_self=False)
 
 
 def _to_response(challenge):

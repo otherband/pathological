@@ -7,7 +7,6 @@ from pathological.app_error_handler import register_error_handlers
 from pathological.events.WebSocketsEventDispatcher import WebSocketsEventDispatcher
 from pathological.events.connections_repository import EmbeddedConnectionRepository, ConnectionRepository
 from pathological.game_domain.game_service import GameService
-from pathological.game_domain.multiplayer_game_repository import EmbeddedMultiplayerGameRepository
 from pathological.game_domain.multiplayer_game_service import MultiplayerGameService
 from pathological.images.image_service import ImageService
 from pathological.models.game_models import Challenge
@@ -78,9 +77,10 @@ def join_multiplayer_game():
 
 @app_with_sockets.on("connect")
 def new_connection():
-    print(f"New connection established [{request.sid}] with data [{request.args}]!")
+    session_id = get_session_id()
+    print(f"New connection established [{session_id}] with data [{request.args}]!")
     connection_repository.add_connection(
-        request.sid,
+        session_id,
         {
             "player_id": request.args["player_id"],
             "game_id": request.args["game_id"]
@@ -90,11 +90,17 @@ def new_connection():
 
 @app_with_sockets.on("disconnect")
 def remove_from_game():
-    connection_id = request.sid
+    # noinspection PyUnresolvedReferences
+    connection_id = get_session_id()
     print(f"Connection terminated {connection_id}")
     player_data = connection_repository.remove_connection(connection_id)
     multiplayer_game_service.leave_game(game_id=player_data["game_id"],
                                         player_id=player_data["player_id"])
+
+
+def get_session_id():
+    # noinspection PyUnresolvedReferences
+    return request.sid
 
 
 @app.route("/actuator/health")

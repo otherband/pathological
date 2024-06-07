@@ -105,6 +105,32 @@ class MultiplayerGameServiceTest(unittest.TestCase):
             "message": "Game started!"
         }, last_event["event_data"])
 
+    def full_game(self):
+        game = self.game_service.create_game("game_full", "player_1")
+
+        self.game_service.join_game("game_full", "player_2")
+        self.game_service.join_game("game_full", "player_3")
+
+        self.game_service.trigger_game_starting("game_full")
+
+        self.game_service.request_challenge("game_full", "player_1")
+        event = self._get_latest_event()
+        self.assertEqual("challenge_requested", event["event_name"])
+        self.assertEqual("player_1", event["event_data"]["player_id"])
+        self.assertEqual("game_full", event["event_data"]["game_id"])
+        self.assertTrue("challenge_id" in event["event_data"].keys())
+
+        self.game_service.submit_answer("game_full", "player_1", event["event_data"]["challenge_id"])
+
+        event = self._get_latest_event()
+        self.assertEqual("answer_submitted", event["event_name"])
+        self.assertEqual({
+            "player_1": 1,
+            "player_2": 0,
+            "player_3": 0
+        }, event["event_data"]["players_scores"])
+        self.assertTrue("players_current_challenges" in event["event_data"].keys())
+
     def _get_latest_event(self):
         latest_event = self.event_dispatcher.dispatched_events[-1]
         return latest_event

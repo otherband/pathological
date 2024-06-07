@@ -1,15 +1,13 @@
-import threading
-
-import eventlet
+import time
 
 from pathological.app_config.game_parameters import GAME_PARAMETERS
 from pathological.events.event_dispatcher import EventDispatcher
 from pathological.events.task_scheduler import TaskScheduler
 from pathological.exceptions.user_input_exception import UserInputException
+from pathological.game_domain.challenge_repository import ChallengeRepository, DummyChallengeRepository
 from pathological.game_domain.multiplayer_game_repository import MultiplayerGameRepository, \
     EmbeddedMultiplayerGameRepository
-from pathological.models.game_models import MultiplayerGame
-import socketio
+from pathological.models.game_models import MultiplayerGame, PlayerSession
 
 
 class MultiplayerGameService:
@@ -18,17 +16,24 @@ class MultiplayerGameService:
     def __init__(self,
                  event_dispatcher: EventDispatcher,
                  task_scheduler: TaskScheduler,
+                 challenge_repository: ChallengeRepository = DummyChallengeRepository(),
                  multiplayer_game_repository: MultiplayerGameRepository = EmbeddedMultiplayerGameRepository(),
                  ):
         self._game_repository = multiplayer_game_repository
         self._event_dispatcher = event_dispatcher
         self._task_scheduler = task_scheduler
+        self._challenge_repository = challenge_repository
 
     def create_game(self, game_id: str, player_id: str):
         if self._game_repository.exists(game_id):
             raise UserInputException(f"Game with ID {game_id} already exists.")
         game = MultiplayerGame(game_id=game_id,
-                               connected_players=[player_id],
+                               connected_players=[PlayerSession(
+                                   player_id=player_id,
+                                   timestamp_start=time.time(),
+                                   challenges_faced={},
+                                   challenges_solved={}
+                               )],
                                running=False)
         self._game_repository.update_game(game)
         return game
@@ -56,6 +61,24 @@ class MultiplayerGameService:
 
         return game
 
+    def request_challenge(self, game_id: str, player_id: str):
+        self._verify_exists(game_id)
+        game = self._game_repository.get_game(game_id)
+        self._verify_player_in_game(game, game_id, player_id)
+
+        player = [p for p in game.connected_players if p.player_id == player_id][0]
+        challenge = self._challenge_repository.get_random_challenge(excluded=player.challenges_faced)
+        self._event_dispatcher.dispatch(
+            "challenge_requested", {
+                "player_id": player_id,
+                "challenge_id": challenge.challenge_id,
+                "": ""
+            }
+        )
+
+    def submit_answer(self, game_id: str, player_id: str, challenge_id: str):
+        pass
+
     def _get_delay(self) -> int:
         """Override for tests!"""
         return GAME_PARAMETERS.start_multiplayer_game_delay_seconds
@@ -81,8 +104,7 @@ class MultiplayerGameService:
 
         game = self._game_repository.get_game(game_id)
 
-        if player_id in game.connected_players:
-            raise UserInputException(f"Name '{player_id}' is already taken in the game '{game_id}'.")
+        self._verify_player_in_game(game, game_id, player_id)
 
         game.connected_players.append(player_id)
         self._game_repository.update_game(game)
@@ -92,6 +114,10 @@ class MultiplayerGameService:
             "connected_players": game.connected_players
         })
         return game
+
+    def _verify_player_in_game(self, game, game_id, player_id):
+        if player_id in [p.player_id for p in game.connected_players]:
+            raise UserInputException(f"Name '{player_id}' is already taken in the game '{game_id}'.")
 
     def leave_game(self, game_id: str, player_id: str):
         if not self._game_repository.exists(game_id):

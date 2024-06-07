@@ -20,7 +20,7 @@ class PlayerSession:
 @define
 class MultiplayerGame:
     game_id: str
-    connected_players: [str]
+    connected_players: [PlayerSession]
     running: bool
 
 

@@ -50,7 +50,7 @@ function initMultiplayerGame(controllerFunction: (gameId: string, playerName: st
                 response.json()
                     .then((responseJson) => {
                         joinLobby();
-                        updateLobby(responseJson["gameId"], responseJson);
+                        updateLobby(responseJson["game_id"], responseJson);
                         bindButton(socket, lobbyId, playerName);
                     })
 
@@ -69,7 +69,7 @@ function showFailureMessage(response: Response, responseDiv: HTMLElement, errorM
 
 function joinLobby() {
     showLobby();
-    hideInitDiv();
+    hideHtmlElement("start-mutliplayer-game-div");
 }
 
 function preInitializeListener(gameId: string, playerId: string): Socket {
@@ -87,7 +87,7 @@ function preInitializeListener(gameId: string, playerId: string): Socket {
         if (gameId === eventData["game_id"]) {
             console.log("Recieved relevant player join event!");
             console.log("Updating lobby!");
-            hideInitDiv();
+            hideHtmlElement("start-mutliplayer-game-div");
             updateLobby(gameId, eventData);
         } else {
             console.log("Recieved irrelevant player join event!");
@@ -100,7 +100,7 @@ function preInitializeListener(gameId: string, playerId: string): Socket {
         if (gameId === eventData["game_id"]) {
             console.log("Recieved relevant player left event!");
             console.log("Updating lobby!");
-            hideInitDiv();
+            hideHtmlElement("start-mutliplayer-game-div");
             updateLobby(gameId, eventData);
         } else {
             console.log("Recieved irrelevant player join event!");
@@ -114,8 +114,9 @@ function preInitializeListener(gameId: string, playerId: string): Socket {
     })
 
     socket.on("game_started", (eventData) => {
-        console.log("Recieved game started event...")
-        updateLobbyInfoDiv(eventData);
+        console.log("Recieved game started event...");
+        hideHtmlElement("mutliplayer-lobby-div");
+        showGameDiv();
     })
 
     return socket;
@@ -123,11 +124,15 @@ function preInitializeListener(gameId: string, playerId: string): Socket {
 
 function updateLobby(gameId: string, hasAllPlayers: object) {
     showLobby();
+
+    const lobbyGameIdHeader = document.getElementById("lobby-game-id-header");
+    lobbyGameIdHeader.innerText = gameId;
+
     const connectPlayersList = document.getElementById("connected-players-list");
     resetDiv(connectPlayersList);
-    const allPlayers: Array<string> = hasAllPlayers["connected_players"];
-    allPlayers.forEach((playerId) => {
-        connectPlayersList.appendChild(buildPlayerListElement(playerId));
+    const allPlayers: Array<object> = hasAllPlayers["connected_players"];
+    allPlayers.forEach((player) => {
+        connectPlayersList.appendChild(buildPlayerListElement(player));
     })
 }
 
@@ -136,9 +141,9 @@ function showLobby() {
     lobbyDiv.setAttribute("style", "display: block");
 }
 
-function buildPlayerListElement(playerId: string) {
+function buildPlayerListElement(player: object) {
     const newPlayerListElement = document.createElement("li");
-    newPlayerListElement.innerText = `Player with ID ${playerId}`;
+    newPlayerListElement.innerText = `Player with ID ${player["player_id"]}`;
     return newPlayerListElement;
 }
 
@@ -151,11 +156,17 @@ function bindButton(socket: Socket, lobbyId: string, playerName: string) {
     };
 }
 
-function hideInitDiv() {
-    document.getElementById("start-mutliplayer-game-div").setAttribute("style", "display: none");
+function hideHtmlElement(elementId: string) {
+    document.getElementById(elementId).setAttribute("style", "display: none");
 }
 
 function updateLobbyInfoDiv(eventData: object) {
     document.getElementById("lobby-info-div").innerText = eventData["message"];
+}
+
+function showGameDiv() {
+    const gameDiv = document.getElementById("multiplayer-game-div");
+    gameDiv.setAttribute("style", "display: block");
+
 }
 

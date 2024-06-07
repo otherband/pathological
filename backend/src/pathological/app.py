@@ -4,6 +4,7 @@ from flask_cors import CORS
 from flask_socketio import SocketIO
 
 from pathological.app_error_handler import register_error_handlers
+from pathological.events.EventletTaskScheduler import EventletTaskScheduler
 from pathological.events.WebSocketsEventDispatcher import WebSocketsEventDispatcher
 from pathological.events.connections_repository import EmbeddedConnectionRepository, ConnectionRepository
 from pathological.game_domain.game_service import GameService
@@ -18,10 +19,13 @@ CORS(app)
 register_error_handlers(app)
 app_with_sockets = SocketIO(app, cors_allowed_origins="*")
 
+event_dispatcher = WebSocketsEventDispatcher(app)
+
 game_service = GameService()
 image_service = ImageService()
-event_dispatcher = WebSocketsEventDispatcher()
-multiplayer_game_service = MultiplayerGameService(event_dispatcher=event_dispatcher)
+multiplayer_game_service = MultiplayerGameService(event_dispatcher=event_dispatcher,
+                                                  task_scheduler=EventletTaskScheduler()
+                                                  )
 connection_repository: ConnectionRepository = EmbeddedConnectionRepository()
 
 
@@ -75,6 +79,13 @@ def join_multiplayer_game():
     return attrs.asdict(game)
 
 
+@app_with_sockets.on("start_game")
+def start_multiplayer_game(event_data: dict):
+    multiplayer_game_service.trigger_game_starting(
+        event_data["game_id"]
+    )
+
+
 @app_with_sockets.on("connect")
 def new_connection():
     session_id = get_session_id()
@@ -94,6 +105,9 @@ def remove_from_game():
     connection_id = get_session_id()
     print(f"Connection terminated {connection_id}")
     player_data = connection_repository.remove_connection(connection_id)
+    # TODO: fix this. Should use the session ID to remove the player -
+    #  because what happens now is, if someone tries to join a game
+    #  with an existing name, the existing player is kicked out (LMAO)
     multiplayer_game_service.leave_game(game_id=player_data["game_id"],
                                         player_id=player_data["player_id"])
 

@@ -21,6 +21,7 @@ class PlayerSession:
 class MultiplayerGame:
     game_id: str
     connected_players: [str]
+    running: bool
 
 
 @define

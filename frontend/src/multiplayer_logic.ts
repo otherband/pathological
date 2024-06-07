@@ -20,6 +20,7 @@ export function joinMultiplayerGame() {
     );
 }
 
+
 function initMultiplayerGame(controllerFunction: (gameId: string, playerName: string) => Promise<Response>,
     errorMessagePrefix: string, successfulMessage: string) {
 
@@ -50,12 +51,15 @@ function initMultiplayerGame(controllerFunction: (gameId: string, playerName: st
                     .then((responseJson) => {
                         joinLobby();
                         updateLobby(responseJson["gameId"], responseJson);
+                        bindButton(socket, lobbyId, playerName);
                     })
 
             }
         });
     }
 }
+
+
 function showFailureMessage(response: Response, responseDiv: HTMLElement, errorMessagePrefix: string) {
     response.json().then((responseJson) => {
         console.log(`Response JSON: ` + JSON.stringify(responseJson));
@@ -75,7 +79,7 @@ function preInitializeListener(gameId: string, playerId: string): Socket {
             "game_id": gameId
         }
     });
-    
+
 
 
     socket.on("player_join_event", (eventData) => {
@@ -103,6 +107,17 @@ function preInitializeListener(gameId: string, playerId: string): Socket {
         }
     })
 
+
+    socket.on("game_starting", (eventData) => {
+        console.log("Recieved game starting event...")
+        updateLobbyInfoDiv(eventData);
+    })
+
+    socket.on("game_started", (eventData) => {
+        console.log("Recieved game started event...")
+        updateLobbyInfoDiv(eventData);
+    })
+
     return socket;
 }
 
@@ -127,8 +142,20 @@ function buildPlayerListElement(playerId: string) {
     return newPlayerListElement;
 }
 
+function bindButton(socket: Socket, lobbyId: string, playerName: string) {
+    document.getElementById("start-multiplayer-game-button").onclick = () => {
+        socket.emit("start_game", {
+            "game_id": lobbyId,
+            "player_id": playerName
+        });
+    };
+}
 
 function hideInitDiv() {
     document.getElementById("start-mutliplayer-game-div").setAttribute("style", "display: none");
+}
+
+function updateLobbyInfoDiv(eventData: object) {
+    document.getElementById("lobby-info-div").innerText = eventData["message"];
 }
 

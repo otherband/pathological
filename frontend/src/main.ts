@@ -111,4 +111,5 @@ function showStartMultiplayerDiv() {
   document.getElementById("start-mutliplayer-game-div").setAttribute("style", "display: block")
 }
 
-export { startGame, createMultiplayerGame, joinMultiplayerGame, showStartMultiplayerDiv };
+export { startGame, createMultiplayerGame,
+  joinMultiplayerGame, showStartMultiplayerDiv };

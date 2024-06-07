@@ -1,8 +1,15 @@
+import threading
+
+import eventlet
+
+from pathological.app_config.game_parameters import GAME_PARAMETERS
 from pathological.events.event_dispatcher import EventDispatcher
+from pathological.events.task_scheduler import TaskScheduler
 from pathological.exceptions.user_input_exception import UserInputException
 from pathological.game_domain.multiplayer_game_repository import MultiplayerGameRepository, \
     EmbeddedMultiplayerGameRepository
 from pathological.models.game_models import MultiplayerGame
+import socketio
 
 
 class MultiplayerGameService:
@@ -10,25 +17,72 @@ class MultiplayerGameService:
 
     def __init__(self,
                  event_dispatcher: EventDispatcher,
-                 multiplayer_game_repository: MultiplayerGameRepository = EmbeddedMultiplayerGameRepository()):
+                 task_scheduler: TaskScheduler,
+                 multiplayer_game_repository: MultiplayerGameRepository = EmbeddedMultiplayerGameRepository(),
+                 ):
         self._game_repository = multiplayer_game_repository
         self._event_dispatcher = event_dispatcher
+        self._task_scheduler = task_scheduler
 
     def create_game(self, game_id: str, player_id: str):
         if self._game_repository.exists(game_id):
             raise UserInputException(f"Game with ID {game_id} already exists.")
-        game = MultiplayerGame(game_id=game_id, connected_players=[player_id])
+        game = MultiplayerGame(game_id=game_id,
+                               connected_players=[player_id],
+                               running=False)
         self._game_repository.update_game(game)
         return game
 
-    def join_game(self, game_id: str, player_id: str):
+    def trigger_game_starting(self, game_id: str):
+        self._verify_exists(game_id)
+
+        game = self._game_repository.get_game(game_id)
+        game.running = True
+        self._game_repository.update_game(game)
+
+        delay = self._get_delay()
+
+        self._event_dispatcher.dispatch("game_starting", {
+            "game_id": game_id,
+            "connected_players": game.connected_players,
+            "start_game_delay": delay,
+            "message": f"Game starting in {delay} seconds..."
+        })
+
+        self._task_scheduler.run_after(
+            seconds_delay=delay,
+            f=lambda: self._start_game(game_id)
+        )
+
+        return game
+
+    def _get_delay(self) -> int:
+        """Override for tests!"""
+        return GAME_PARAMETERS.start_multiplayer_game_delay_seconds
+
+    def _start_game(self, game_id: str):
+        self._verify_exists(game_id)
+        game = self._game_repository.get_game(game_id)
+        self._event_dispatcher.dispatch(
+            "game_started",
+            {
+                "game_id": game_id,
+                "connected_players": game.connected_players,
+                "message": "Game started!"
+            }
+        )
+
+    def _verify_exists(self, game_id):
         if not self._game_repository.exists(game_id):
             raise UserInputException(f"Game with ID {game_id} does not exist.")
+
+    def join_game(self, game_id: str, player_id: str):
+        self._verify_exists(game_id)
 
         game = self._game_repository.get_game(game_id)
 
         if player_id in game.connected_players:
-            raise UserInputException(f"Player '{player_id}' has already joined the game '{game_id}'.")
+            raise UserInputException(f"Name '{player_id}' is already taken in the game '{game_id}'.")
 
         game.connected_players.append(player_id)
         self._game_repository.update_game(game)

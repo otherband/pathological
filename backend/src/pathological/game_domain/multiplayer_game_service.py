@@ -72,7 +72,6 @@ class MultiplayerGameService:
             "challenge_requested", {
                 "player_id": player_id,
                 "challenge_id": challenge.challenge_id,
-                "": ""
             }
         )
 

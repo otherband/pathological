@@ -1,0 +1,80 @@
+openapi: 3.0.0
+info:
+  title: Multiplayer Game Events API
+  version: 1.0.0
+paths:
+  /multiplayer-game-events:
+    post:
+      summary: Send a multiplayer game event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/GameStarting'
+                - $ref: '#/components/schemas/GameStarted'
+                - $ref: '#/components/schemas/ChallengeRequested'
+                - $ref: '#/components/schemas/PlayerJoin'
+      responses:
+        '200':
+          description: Event received successfully
+components:
+  schemas:
+    MultiplayerGameEvent:
+      type: object
+    BasicPlayerData:
+      type: object
+      properties:
+        player_id:
+          type: string
+    GameStarting:
+      allOf:
+        - $ref: '#/components/schemas/MultiplayerGameEvent'
+        - type: object
+          properties:
+            game_id:
+              type: string
+            connected_players:
+              type: array
+              items:
+                $ref: '#/components/schemas/BasicPlayerData'
+            start_game_delay:
+              type: integer
+            message:
+              type: string
+    GameStarted:
+      allOf:
+        - $ref: '#/components/schemas/MultiplayerGameEvent'
+        - type: object
+          properties:
+            game_id:
+              type: string
+            connected_players:
+              type: array
+              items:
+                $ref: '#/components/schemas/BasicPlayerData'
+            message:
+              type: string
+    ChallengeRequested:
+      allOf:
+        - $ref: '#/components/schemas/MultiplayerGameEvent'
+        - type: object
+          properties:
+            player_id:
+              type: string
+            challenge_id:
+              type: string
+    PlayerJoin:
+      allOf:
+        - $ref: '#/components/schemas/MultiplayerGameEvent'
+        - type: object
+          properties:
+            player_id:
+              type: string
+            game_id:
+              type: string
+            connected_players:
+              type: array
+              items:
+                $ref: '#/components/schemas/BasicPlayerData'

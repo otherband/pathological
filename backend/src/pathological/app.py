@@ -43,7 +43,7 @@ def request_challenge():
     data = request.json
     print(f"Received {data}")
     challenge = game_service.request_challenge(data["player_id"])
-    return _to_response(challenge)
+    return _to_challenge_response(challenge)
 
 
 @app.route(endpoint("/solve-challenge"), methods=["POST"])
@@ -69,14 +69,14 @@ def get_score(player_id: str):
 def create_multiplayer_game():
     json = request.json
     game = multiplayer_game_service.create_game(player_id=json["player_id"], game_id=json["game_id"])
-    return _game_to_response(game)
+    return _to_game_response(game)
 
 
 @app.route(endpoint("/multiplayer/game/join"), methods=["PUT"])
 def join_multiplayer_game():
     json = request.json
     game = multiplayer_game_service.join_game(game_id=json["game_id"], player_id=json["player_id"])
-    return _game_to_response(game)
+    return _to_game_response(game)
 
 
 @app_with_sockets.on("start_game")
@@ -112,11 +112,6 @@ def remove_from_game():
                                         player_id=player_data["player_id"])
 
 
-def get_session_id():
-    # noinspection PyUnresolvedReferences
-    return request.sid
-
-
 @app.route("/actuator/health")
 def health():
     return {
@@ -124,7 +119,12 @@ def health():
     }
 
 
-def _game_to_response(game: MultiplayerGame):
+def get_session_id():
+    # noinspection PyUnresolvedReferences
+    return request.sid
+
+
+def _to_game_response(game: MultiplayerGame):
     # noinspection PyTypeChecker
     response_dict = attrs.asdict(game)
     response_dict["connected_players"] = [{
@@ -133,7 +133,7 @@ def _game_to_response(game: MultiplayerGame):
     return response_dict
 
 
-def _to_response(challenge):
+def _to_challenge_response(challenge: Challenge):
     # noinspection PyTypeChecker
     return attrs.asdict(Challenge(challenge_id=challenge.challenge_id,
                                   image_id=challenge.image_id,

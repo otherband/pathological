@@ -49,7 +49,7 @@ class MultiplayerGameService:
 
         self._event_dispatcher.dispatch("game_starting", {
             "game_id": game_id,
-            "connected_players": game.get_connected_ids(),
+            "connected_players": game.get_truncated_player_objects(),
             "start_game_delay": delay,
             "message": f"Game starting in {delay} seconds..."
         })

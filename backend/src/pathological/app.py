@@ -19,7 +19,7 @@ CORS(app)
 register_error_handlers(app)
 app_with_sockets = SocketIO(app, cors_allowed_origins="*")
 
-event_dispatcher = WebSocketsEventDispatcher()
+event_dispatcher = WebSocketsEventDispatcher(app)
 
 game_service = GameService()
 image_service = ImageService()

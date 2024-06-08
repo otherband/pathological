@@ -63,7 +63,12 @@ class MultiplayerGameServiceTest(unittest.TestCase):
         self.assertEqual({
             "player_id": "player_2",
             "game_id": "game_2",
-            "connected_players": ["player_1", "player_2"]
+            "connected_players": [{
+                "player_id": "player_1"
+            },
+                {
+                    "player_id": "player_2"
+                }]
         }, latest_event["event_data"])
         self.assertEqual(NO_DELAY, self.event_dispatcher.latest_delay)
 
@@ -78,7 +83,7 @@ class MultiplayerGameServiceTest(unittest.TestCase):
         self.assertEqual({
             "game_id": "game13",
             "player_id": "player2",
-            "connected_players": ["player1"]
+            "connected_players": [{"player_id": "player_1"}]
         }, latest_event["event_data"])
         self.assertEqual(NO_DELAY, self.event_dispatcher.latest_delay)
 

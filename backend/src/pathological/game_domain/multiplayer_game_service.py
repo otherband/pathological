@@ -90,7 +90,7 @@ class MultiplayerGameService:
             "game_started",
             {
                 "game_id": game_id,
-                "connected_players": game.get_connected_ids(),
+                "connected_players": game.get_truncated_player_objects(),
                 "message": "Game started!"
             }
         )
@@ -116,7 +116,7 @@ class MultiplayerGameService:
         self._event_dispatcher.dispatch("player_join_event", {
             "player_id": player_id,
             "game_id": game_id,
-            "connected_players": game.get_connected_ids()
+            "connected_players": game.get_truncated_player_objects()
         })
         return game
 
@@ -142,7 +142,7 @@ class MultiplayerGameService:
         self._event_dispatcher.dispatch("player_left_game", {
             "player_id": player_id,
             "game_id": game_id,
-            "connected_players": game.get_connected_ids()
+            "connected_players": game.get_truncated_player_objects()
         })
 
         return game

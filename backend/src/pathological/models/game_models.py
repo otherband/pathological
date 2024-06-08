@@ -28,6 +28,9 @@ class MultiplayerGame:
     def get_connected_ids(self):
         return [p.player_id for p in self.connected_players]
 
+    def get_truncated_player_objects(self):
+        return [{"player_id": p.player_id} for p in self.connected_players]
+
 
 @define
 class PlayerJoinEvent:

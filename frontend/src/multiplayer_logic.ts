@@ -123,8 +123,6 @@ function preInitializeListener(gameId: string, playerId: string): Socket {
 }
 
 function updateLobby(gameId: string, hasAllPlayers: object) {
-    showLobby();
-
     const lobbyGameIdHeader = document.getElementById("lobby-game-id-header");
     lobbyGameIdHeader.innerText = gameId;
 

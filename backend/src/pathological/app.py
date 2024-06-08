@@ -10,7 +10,7 @@ from pathological.events.connections_repository import EmbeddedConnectionReposit
 from pathological.game_domain.game_service import GameService
 from pathological.game_domain.multiplayer_game_service import MultiplayerGameService
 from pathological.images.image_service import ImageService
-from pathological.models.game_models import Challenge
+from pathological.models.game_models import Challenge, MultiplayerGame
 
 SUCCESSFUL_JOIN = "successful_join"
 
@@ -69,14 +69,14 @@ def get_score(player_id: str):
 def create_multiplayer_game():
     json = request.json
     game = multiplayer_game_service.create_game(player_id=json["player_id"], game_id=json["game_id"])
-    return attrs.asdict(game)
+    return _game_to_response(game)
 
 
 @app.route(endpoint("/multiplayer/game/join"), methods=["PUT"])
 def join_multiplayer_game():
     json = request.json
     game = multiplayer_game_service.join_game(game_id=json["game_id"], player_id=json["player_id"])
-    return attrs.asdict(game)
+    return _game_to_response(game)
 
 
 @app_with_sockets.on("start_game")
@@ -122,6 +122,15 @@ def health():
     return {
         "status": "UP"
     }
+
+
+def _game_to_response(game: MultiplayerGame):
+    # noinspection PyTypeChecker
+    response_dict = attrs.asdict(game)
+    response_dict["connected_players"] = [{
+        "player_id": p.player_id
+    } for p in game.connected_players]
+    return response_dict
 
 
 def _to_response(challenge):

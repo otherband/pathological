@@ -31,8 +31,8 @@ class MultiplayerGameService:
                                connected_players=[PlayerSession(
                                    player_id=player_id,
                                    timestamp_start=time.time(),
-                                   challenges_faced={},
-                                   challenges_solved={}
+                                   challenges_faced=set(),
+                                   challenges_solved=set()
                                )],
                                running=False)
         self._game_repository.update_game(game)
@@ -49,7 +49,7 @@ class MultiplayerGameService:
 
         self._event_dispatcher.dispatch("game_starting", {
             "game_id": game_id,
-            "connected_players": game.connected_players,
+            "connected_players": game.get_connected_ids(),
             "start_game_delay": delay,
             "message": f"Game starting in {delay} seconds..."
         })
@@ -90,7 +90,7 @@ class MultiplayerGameService:
             "game_started",
             {
                 "game_id": game_id,
-                "connected_players": game.connected_players,
+                "connected_players": game.get_connected_ids(),
                 "message": "Game started!"
             }
         )
@@ -106,12 +106,17 @@ class MultiplayerGameService:
 
         self._verify_player_in_game(game, game_id, player_id)
 
-        game.connected_players.append(player_id)
+        game.connected_players.append(PlayerSession(
+            challenges_solved=set(),
+            challenges_faced=set(),
+            player_id=player_id,
+            timestamp_start=time.time()
+        ))
         self._game_repository.update_game(game)
         self._event_dispatcher.dispatch("player_join_event", {
             "player_id": player_id,
             "game_id": game_id,
-            "connected_players": game.connected_players
+            "connected_players": game.get_connected_ids()
         })
         return game
 
@@ -125,10 +130,10 @@ class MultiplayerGameService:
 
         game = self._game_repository.get_game(game_id)
 
-        if player_id not in game.connected_players:
+        if player_id not in game.get_connected_ids():
             raise ValueError(f"Player {player_id} not found in game {game_id}")
 
-        game.connected_players = [p for p in game.connected_players if p != player_id]
+        game.connected_players = [p for p in game.connected_players if p.player_id != player_id]
         if len(game.connected_players) == 0:
             self._game_repository.delete_game(game_id)
         else:
@@ -137,7 +142,7 @@ class MultiplayerGameService:
         self._event_dispatcher.dispatch("player_left_game", {
             "player_id": player_id,
             "game_id": game_id,
-            "connected_players": game.connected_players
+            "connected_players": game.get_connected_ids()
         })
 
         return game

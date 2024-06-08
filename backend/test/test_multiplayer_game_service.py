@@ -43,16 +43,16 @@ class MultiplayerGameServiceTest(unittest.TestCase):
 
     def test_create_game(self):
         game = self.game_service.create_game("game_1", "player_1")
-        self.assertEqual(["player_1"], game.connected_players)
+        self.assertEqual(["player_1"], game.get_connected_ids())
         with self.assertRaises(UserInputException) as ctx:
             self.game_service.create_game("game_1", "player_2")
         self.assertEqual(ctx.exception.args[0], "Game with ID game_1 already exists.")
 
     def test_join_game(self):
         game = self.game_service.create_game("game_2", "player_1")
-        self.assertEqual(["player_1"], game.connected_players)
+        self.assertEqual(["player_1"], game.get_connected_ids())
         updated_game = self.game_service.join_game("game_2", "player_2")
-        self.assertEqual(["player_1", "player_2"], updated_game.connected_players)
+        self.assertEqual(["player_1", "player_2"], updated_game.get_connected_ids())
 
         with self.assertRaises(UserInputException) as ctx:
             self.game_service.join_game("game_2", "player_1")
@@ -71,7 +71,7 @@ class MultiplayerGameServiceTest(unittest.TestCase):
         self.game_service.create_game("game13", "player1")
         self.game_service.join_game("game13", "player2")
         updated_game = self.game_service.leave_game("game13", "player2")
-        self.assertEqual(["player1"], updated_game.connected_players)
+        self.assertEqual(["player1"], updated_game.get_connected_ids())
 
         latest_event = self._get_latest_event()
         self.assertEqual("player_left_game", latest_event["event_name"])

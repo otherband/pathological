@@ -1,3 +1,5 @@
+from typing import Set, List
+
 from attrs import define
 
 
@@ -12,16 +14,19 @@ class Challenge:
 @define
 class PlayerSession:
     player_id: str
-    challenges_faced: {str}
-    challenges_solved: {str}
+    challenges_faced: Set[str]
+    challenges_solved: Set[str]
     timestamp_start: float
 
 
 @define
 class MultiplayerGame:
     game_id: str
-    connected_players: [PlayerSession]
+    connected_players: List[PlayerSession]
     running: bool
+
+    def get_connected_ids(self):
+        return [p.player_id for p in self.connected_players]
 
 
 @define

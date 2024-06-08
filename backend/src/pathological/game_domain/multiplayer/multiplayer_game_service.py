@@ -13,6 +13,7 @@ from openapi_client.models.challenge_requested import ChallengeRequested
 from openapi_client.models.player_join import PlayerJoin
 from openapi_client.models.player_left import PlayerLeft
 from openapi_client.models.game_started import GameStarted
+from openapi_client.models.submit_answer import SubmitAnswer
 
 
 class MultiplayerGameService:
@@ -43,6 +44,47 @@ class MultiplayerGameService:
         self._game_repository.update_game(game)
         return game
 
+    def join_game(self, game_id: str, player_id: str):
+        self._verify_exists(game_id)
+
+        game = self._game_repository.get_game(game_id)
+
+        if player_id in [p.player_id for p in game.connected_players]:
+            raise UserInputException(f"Name '{player_id}' is already taken in the game '{game_id}'.")
+
+        game.connected_players.append(PlayerSession(
+            challenges_solved=set(),
+            challenges_faced=set(),
+            player_id=player_id,
+            timestamp_start=time.time()
+        ))
+        self._game_repository.update_game(game)
+
+        event = PlayerJoin()
+        event.player_id = player_id
+        event.game_id = game_id
+        event.connected_players = game.get_truncated_player_objects()
+
+        self._event_dispatcher.dispatch(event)
+        return game
+
+    def leave_game(self, game_id: str, player_id: str):
+        game = self._from_verified_pair(game_id=game_id, player_id=player_id)
+
+        game.connected_players = [p for p in game.connected_players if p.player_id != player_id]
+        if len(game.connected_players) == 0:
+            self._game_repository.delete_game(game_id)
+        else:
+            self._game_repository.update_game(game)
+
+        event = PlayerLeft()
+        event.player_id = player_id
+        event.game_id = game_id
+        event.connected_players = game.get_truncated_player_objects()
+        self._event_dispatcher.dispatch(event)
+
+        return game
+
     def trigger_game_starting(self, game_id: str):
         self._verify_exists(game_id)
 
@@ -67,21 +109,24 @@ class MultiplayerGameService:
 
         return game
 
-    def request_challenge(self, game_id: str, player_id: str):
-        self._verify_exists(game_id)
-        game = self._game_repository.get_game(game_id)
-        self._verify_player_in_game(game, game_id, player_id)
+    def get_challenge(self, game_id: str, player_id: str):
+        game = self._from_verified_pair(game_id, player_id)
 
         player = [p for p in game.connected_players if p.player_id == player_id][0]
         challenge = self._challenge_repository.get_random_challenge(excluded=player.challenges_faced)
 
         event = ChallengeRequested()
         event.player_id = player_id
+        event.game_id = game_id
         event.challenge_id = challenge.challenge_id
         self._event_dispatcher.dispatch(event)
 
     def submit_answer(self, game_id: str, player_id: str, challenge_id: str):
-        pass
+        event = SubmitAnswer()
+        event.game_id = game_id
+        event.player_id = player_id
+        event.challenge_id = challenge_id
+        self._event_dispatcher.dispatch(event)
 
     def _get_delay(self) -> int:
         """Override for tests!"""
@@ -98,56 +143,16 @@ class MultiplayerGameService:
 
         self._event_dispatcher.dispatch(event)
 
+    def _from_verified_pair(self, game_id: str, player_id: str) -> MultiplayerGame:
+        self._verify_exists(game_id)
+        game = self._game_repository.get_game(game_id)
+        self._verify_player_in(game, game_id, player_id)
+        return game
+
+    def _verify_player_in(self, game, game_id, player_id):
+        if player_id not in game.get_connected_ids():
+            raise UserInputException(f"Name '{player_id}' is not in the game '{game_id}'.")
+
     def _verify_exists(self, game_id):
         if not self._game_repository.exists(game_id):
             raise UserInputException(f"Game with ID {game_id} does not exist.")
-
-    def join_game(self, game_id: str, player_id: str):
-        self._verify_exists(game_id)
-
-        game = self._game_repository.get_game(game_id)
-
-        self._verify_player_in_game(game, game_id, player_id)
-
-        game.connected_players.append(PlayerSession(
-            challenges_solved=set(),
-            challenges_faced=set(),
-            player_id=player_id,
-            timestamp_start=time.time()
-        ))
-        self._game_repository.update_game(game)
-
-        event = PlayerJoin()
-        event.player_id = player_id
-        event.game_id = game_id
-        event.connected_players = game.get_truncated_player_objects()
-
-        self._event_dispatcher.dispatch(event)
-        return game
-
-    def _verify_player_in_game(self, game, game_id, player_id):
-        if player_id in [p.player_id for p in game.connected_players]:
-            raise UserInputException(f"Name '{player_id}' is already taken in the game '{game_id}'.")
-
-    def leave_game(self, game_id: str, player_id: str):
-        if not self._game_repository.exists(game_id):
-            raise ValueError(f"Game {game_id} does not exist")
-
-        game = self._game_repository.get_game(game_id)
-
-        if player_id not in game.get_connected_ids():
-            raise ValueError(f"Player {player_id} not found in game {game_id}")
-
-        game.connected_players = [p for p in game.connected_players if p.player_id != player_id]
-        if len(game.connected_players) == 0:
-            self._game_repository.delete_game(game_id)
-        else:
-            self._game_repository.update_game(game)
-
-        event = PlayerLeft()
-        event.player_id = player_id
-        event.game_id = game_id
-        event.connected_players = game.get_truncated_player_objects()
-        self._event_dispatcher.dispatch(event)
-
-        return game

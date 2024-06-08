@@ -64,7 +64,22 @@ components:
           properties:
             player_id:
               type: string
+            game_id:
+              type: string
             challenge_id:
+              type: string
+    SubmitAnswer:
+      allOf:
+        - $ref: '#/components/schemas/MultiplayerGameEvent'
+        - type: object
+          properties:
+            player_id:
+              type: string
+            game_id:
+              type: string
+            challenge_id:
+              type: string
+            answer:
               type: string
     PlayerJoin:
       allOf:

@@ -87,8 +87,7 @@ function preInitializeListener(gameId: string, playerId: string): Socket {
         socket,
         PlayerJoin.name,
         (eventData: PlayerJoin) => {
-
-            if (gameId === eventData.gameId) {
+            if (gameId === eventData.game_id) {
                 console.log("Recieved relevant player join event!");
                 console.log("Updating lobby!");
                 hideHtmlElement("start-mutliplayer-game-div");
@@ -103,7 +102,7 @@ function preInitializeListener(gameId: string, playerId: string): Socket {
         PlayerLeft.name,
         (eventData: PlayerLeft) => {
 
-            if (gameId === eventData.gameId) {
+            if (gameId === eventData.game_id) {
                 console.log("Recieved relevant player left event!");
                 console.log("Updating lobby!");
                 hideHtmlElement("start-mutliplayer-game-div");

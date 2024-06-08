@@ -1,7 +1,7 @@
 import unittest
 import uuid
 
-from pathological.game_domain.game_service import GameService
+from pathological.game_domain.single_player.game_service import GameService
 
 CORRECT_ANSWER = "1"
 

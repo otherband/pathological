@@ -6,7 +6,7 @@ from openapi_client.api_response import BaseModel
 from pathological.events.event_dispatcher import EventDispatcher
 from pathological.events.task_scheduler import TaskScheduler
 from pathological.exceptions.user_input_exception import UserInputException
-from pathological.game_domain.multiplayer_game_service import MultiplayerGameService
+from pathological.game_domain.multiplayer.multiplayer_game_service import MultiplayerGameService
 
 NO_DELAY = -1
 
@@ -17,11 +17,11 @@ class DummyEventDispatcher(EventDispatcher):
         self.dispatched_events: List[Dict[str, Dict]] = []
         self.latest_delay: int = NO_DELAY
 
-    def dispatch(self, event_data: BaseModel) -> None:
+    def dispatch(self, event: BaseModel) -> None:
         self.latest_delay = NO_DELAY
         self.dispatched_events.append({
-            "event_name": type(event_data).__name__,
-            "event_data": event_data.dict(),
+            "event_name": type(event).__name__,
+            "event_data": event.dict(),
         })
 
 

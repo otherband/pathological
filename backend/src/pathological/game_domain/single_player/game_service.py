@@ -2,7 +2,7 @@ import time
 import uuid
 
 from pathological.game_domain.challenge_repository import ChallengeRepository, DummyChallengeRepository
-from pathological.game_domain.player_repository import EmbeddedPlayerSessionRepository, PlayerSessionRepository
+from pathological.game_domain.single_player.player_repository import EmbeddedPlayerSessionRepository, PlayerSessionRepository
 from pathological.models.game_models import Challenge, PlayerSession
 
 

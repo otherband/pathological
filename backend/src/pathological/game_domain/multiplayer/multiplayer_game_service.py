@@ -5,7 +5,7 @@ from pathological.events.event_dispatcher import EventDispatcher
 from pathological.events.task_scheduler import TaskScheduler
 from pathological.exceptions.user_input_exception import UserInputException
 from pathological.game_domain.challenge_repository import ChallengeRepository, DummyChallengeRepository
-from pathological.game_domain.multiplayer_game_repository import MultiplayerGameRepository, \
+from pathological.game_domain.multiplayer.multiplayer_game_repository import MultiplayerGameRepository, \
     EmbeddedMultiplayerGameRepository
 from pathological.models.game_models import MultiplayerGame, PlayerSession
 from openapi_client.models.game_starting import GameStarting

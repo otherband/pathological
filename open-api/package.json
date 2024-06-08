@@ -5,8 +5,8 @@
   "author": "Yazan",
   "license": "ISC",
   "scripts": {
-    "generate-python": "openapi-generator-cli generate -i ./event-spec.yml -g python -o pathological-python-api --model-name-prefix= --model-package=\n",
-    "generate-typescript": "openapi-generator-cli generate -i ./event-spec.yml -g typescript -o pathological-typescript-api --model-name-prefix= --model-package=\n"
+    "generate-python": "openapi-generator-cli generate -i ./api-spec.yml -g python -o generated/pathological-python-api",
+    "generate-typescript": "openapi-generator-cli generate -i ./api-spec.yml -g typescript -o generated/pathological-typescript-api"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "^2.13.4"

@@ -2,8 +2,6 @@ from typing import List
 
 from attrs import define
 
-from pathological.models.game_models import PlayerSession
-
 
 class MultiplayerGameEvent:
     pass

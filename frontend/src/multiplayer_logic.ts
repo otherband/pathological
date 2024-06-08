@@ -1,6 +1,7 @@
 import { Socket, io } from "socket.io-client";
 import { hostApi } from "./config";
 import { MutliplayerController } from "./multiplayer_controller";
+import {GameStarting} from "../../open-api/generated/pathological-typescript-api/models/GameStarting"
 
 const controller = new MutliplayerController();
 
@@ -108,9 +109,9 @@ function preInitializeListener(gameId: string, playerId: string): Socket {
     })
 
 
-    socket.on("game_starting", (eventData) => {
+    socket.on("game_starting", (eventData: GameStarting) => {
         console.log("Recieved game starting event...")
-        updateLobbyInfoDiv(eventData);
+        document.getElementById("lobby-info-div").innerText = eventData.message;
     })
 
     socket.on("game_started", (eventData) => {
@@ -156,10 +157,6 @@ function bindButton(socket: Socket, lobbyId: string, playerName: string) {
 
 function hideHtmlElement(elementId: string) {
     document.getElementById(elementId).setAttribute("style", "display: none");
-}
-
-function updateLobbyInfoDiv(eventData: object) {
-    document.getElementById("lobby-info-div").innerText = eventData["message"];
 }
 
 function showGameDiv() {

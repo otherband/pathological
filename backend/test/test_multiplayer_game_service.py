@@ -1,6 +1,8 @@
 import unittest
 from typing import List, Dict, Callable
 
+from openapi_client.api_response import BaseModel
+
 from pathological.events.event_dispatcher import EventDispatcher
 from pathological.events.task_scheduler import TaskScheduler
 from pathological.exceptions.user_input_exception import UserInputException
@@ -12,14 +14,14 @@ NO_DELAY = -1
 class DummyEventDispatcher(EventDispatcher):
 
     def __init__(self):
-        self.dispatched_events: List[Dict[str, dict]] = []
+        self.dispatched_events: List[Dict[str, Dict]] = []
         self.latest_delay: int = NO_DELAY
 
-    def dispatch(self, event_name: str, event_data: dict) -> None:
+    def dispatch(self, event_data: BaseModel) -> None:
         self.latest_delay = NO_DELAY
         self.dispatched_events.append({
-            "event_name": event_name,
-            "event_data": event_data,
+            "event_name": type(event_data).__name__,
+            "event_data": event_data.dict(),
         })
 
 
@@ -59,7 +61,7 @@ class MultiplayerGameServiceTest(unittest.TestCase):
         self.assertEqual(ctx.exception.args[0], "Name 'player_1' is already taken in the game 'game_2'.")
 
         latest_event = self._get_latest_event()
-        self.assertEqual("player_join_event", latest_event["event_name"])
+        self.assertEqual("PlayerJoin", latest_event["event_name"])
         self.assertEqual({
             "player_id": "player_2",
             "game_id": "game_2",
@@ -79,7 +81,7 @@ class MultiplayerGameServiceTest(unittest.TestCase):
         self.assertEqual(["player1"], updated_game.get_connected_ids())
 
         latest_event = self._get_latest_event()
-        self.assertEqual("player_left_game", latest_event["event_name"])
+        self.assertEqual("PlayerLeft", latest_event["event_name"])
         self.assertEqual({
             "game_id": "game13",
             "player_id": "player2",
@@ -93,7 +95,7 @@ class MultiplayerGameServiceTest(unittest.TestCase):
 
         second_to_last = self.event_dispatcher.dispatched_events[-2]
 
-        self.assertEqual("game_starting", second_to_last["event_name"])
+        self.assertEqual("GameStarting", second_to_last["event_name"])
         self.assertEqual({
             "game_id": "game42",
             "connected_players": [{
@@ -105,7 +107,7 @@ class MultiplayerGameServiceTest(unittest.TestCase):
 
         last_event = self._get_latest_event()
 
-        self.assertEqual("game_started", last_event["event_name"])
+        self.assertEqual("GameStarted", last_event["event_name"])
         self.assertEqual({
             "game_id": "game42",
             "connected_players": [{

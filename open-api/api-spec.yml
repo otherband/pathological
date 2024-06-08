@@ -16,6 +16,7 @@ paths:
                 - $ref: '#/components/schemas/GameStarted'
                 - $ref: '#/components/schemas/ChallengeRequested'
                 - $ref: '#/components/schemas/PlayerJoin'
+                - $ref: '#/components/schemas/PlayerLeft'
       responses:
         '200':
           description: Event received successfully
@@ -66,6 +67,19 @@ components:
             challenge_id:
               type: string
     PlayerJoin:
+      allOf:
+        - $ref: '#/components/schemas/MultiplayerGameEvent'
+        - type: object
+          properties:
+            player_id:
+              type: string
+            game_id:
+              type: string
+            connected_players:
+              type: array
+              items:
+                $ref: '#/components/schemas/BasicPlayerData'
+    PlayerLeft:
       allOf:
         - $ref: '#/components/schemas/MultiplayerGameEvent'
         - type: object

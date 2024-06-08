@@ -8,6 +8,11 @@ from pathological.game_domain.challenge_repository import ChallengeRepository, D
 from pathological.game_domain.multiplayer_game_repository import MultiplayerGameRepository, \
     EmbeddedMultiplayerGameRepository
 from pathological.models.game_models import MultiplayerGame, PlayerSession
+from openapi_client.models.game_starting import GameStarting
+from openapi_client.models.challenge_requested import ChallengeRequested
+from openapi_client.models.player_join import PlayerJoin
+from openapi_client.models.player_left import PlayerLeft
+from openapi_client.models.game_started import GameStarted
 
 
 class MultiplayerGameService:
@@ -47,12 +52,13 @@ class MultiplayerGameService:
 
         delay = self._get_delay()
 
-        self._event_dispatcher.dispatch("game_starting", {
-            "game_id": game_id,
-            "connected_players": game.get_truncated_player_objects(),
-            "start_game_delay": delay,
-            "message": f"Game starting in {delay} seconds..."
-        })
+        starting_event = GameStarting()
+        starting_event.game_id = game_id
+        starting_event.connected_players = game.get_truncated_player_objects()
+        starting_event.start_game_delay = delay
+        starting_event.message = f"Game starting in {delay} seconds..."
+
+        self._event_dispatcher.dispatch(starting_event)
 
         self._task_scheduler.run_after(
             seconds_delay=delay,
@@ -68,12 +74,11 @@ class MultiplayerGameService:
 
         player = [p for p in game.connected_players if p.player_id == player_id][0]
         challenge = self._challenge_repository.get_random_challenge(excluded=player.challenges_faced)
-        self._event_dispatcher.dispatch(
-            "challenge_requested", {
-                "player_id": player_id,
-                "challenge_id": challenge.challenge_id,
-            }
-        )
+
+        event = ChallengeRequested()
+        event.player_id = player_id
+        event.challenge_id = challenge.challenge_id
+        self._event_dispatcher.dispatch(event)
 
     def submit_answer(self, game_id: str, player_id: str, challenge_id: str):
         pass
@@ -85,14 +90,13 @@ class MultiplayerGameService:
     def _start_game(self, game_id: str):
         self._verify_exists(game_id)
         game = self._game_repository.get_game(game_id)
-        self._event_dispatcher.dispatch(
-            "game_started",
-            {
-                "game_id": game_id,
-                "connected_players": game.get_truncated_player_objects(),
-                "message": "Game started!"
-            }
-        )
+
+        event = GameStarted()
+        event.game_id = game_id
+        event.connected_players = game.get_truncated_player_objects()
+        event.message = "Game started!"
+
+        self._event_dispatcher.dispatch(event)
 
     def _verify_exists(self, game_id):
         if not self._game_repository.exists(game_id):
@@ -112,11 +116,13 @@ class MultiplayerGameService:
             timestamp_start=time.time()
         ))
         self._game_repository.update_game(game)
-        self._event_dispatcher.dispatch("player_join_event", {
-            "player_id": player_id,
-            "game_id": game_id,
-            "connected_players": game.get_truncated_player_objects()
-        })
+
+        event = PlayerJoin()
+        event.player_id = player_id
+        event.game_id = game_id
+        event.connected_players = game.get_truncated_player_objects()
+
+        self._event_dispatcher.dispatch(event)
         return game
 
     def _verify_player_in_game(self, game, game_id, player_id):
@@ -138,10 +144,10 @@ class MultiplayerGameService:
         else:
             self._game_repository.update_game(game)
 
-        self._event_dispatcher.dispatch("player_left_game", {
-            "player_id": player_id,
-            "game_id": game_id,
-            "connected_players": game.get_truncated_player_objects()
-        })
+        event = PlayerLeft()
+        event.player_id = player_id
+        event.game_id = game_id
+        event.connected_players = game.get_truncated_player_objects()
+        self._event_dispatcher.dispatch(event)
 
         return game

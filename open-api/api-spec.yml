@@ -27,20 +27,20 @@ components:
     BasicPlayerData:
       type: object
       properties:
-        playerId:
+        player_id:
           type: string
     GameStarting:
       allOf:
         - $ref: '#/components/schemas/MultiplayerGameEvent'
         - type: object
           properties:
-            gameId:
+            game_id:
               type: string
-            connectedPlayers:
+            connected_players:
               type: array
               items:
                 $ref: '#/components/schemas/BasicPlayerData'
-            startGameDelay:
+            start_game_delay:
               type: integer
             message:
               type: string
@@ -49,9 +49,9 @@ components:
         - $ref: '#/components/schemas/MultiplayerGameEvent'
         - type: object
           properties:
-            gameId:
+            game_id:
               type: string
-            connectedPlayers:
+            connected_players:
               type: array
               items:
                 $ref: '#/components/schemas/BasicPlayerData'
@@ -62,20 +62,20 @@ components:
         - $ref: '#/components/schemas/MultiplayerGameEvent'
         - type: object
           properties:
-            playerId:
+            player_id:
               type: string
-            challengeId:
+            challenge_id:
               type: string
     PlayerJoin:
       allOf:
         - $ref: '#/components/schemas/MultiplayerGameEvent'
         - type: object
           properties:
-            playerId:
+            player_id:
               type: string
-            gameId:
+            game_id:
               type: string
-            connectedPlayers:
+            connected_players:
               type: array
               items:
                 $ref: '#/components/schemas/BasicPlayerData'
@@ -84,11 +84,11 @@ components:
         - $ref: '#/components/schemas/MultiplayerGameEvent'
         - type: object
           properties:
-            playerId:
+            player_id:
               type: string
-            gameId:
+            game_id:
               type: string
-            connectedPlayers:
+            connected_players:
               type: array
               items:
                 $ref: '#/components/schemas/BasicPlayerData'

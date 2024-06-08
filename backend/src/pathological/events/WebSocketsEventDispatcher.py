@@ -10,8 +10,8 @@ class WebSocketsEventDispatcher(EventDispatcher):
     def __init__(self, flask_app: Flask):
         self._flask_app_context = flask_app.app_context()
 
-    def dispatch(self, event_name: str,
-                 event_data: BaseModel) -> None:
+    def dispatch(self, event_data: BaseModel) -> None:
+        event_name = type(event_data).__name__
         print(f"Emitting event {event_name} with data {event_data}")
         with self._flask_app_context:
             emit(

@@ -79,7 +79,7 @@ def join_multiplayer_game():
     return _to_game_response(game)
 
 
-@app_with_sockets.on("start_game")
+@app_with_sockets.on("StartGame")
 def start_multiplayer_game(event_data: dict):
     multiplayer_game_service.trigger_game_starting(
         event_data["game_id"]

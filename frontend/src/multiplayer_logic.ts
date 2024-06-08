@@ -2,6 +2,9 @@ import { Socket, io } from "socket.io-client";
 import { hostApi } from "./config";
 import { MutliplayerController } from "./multiplayer_controller";
 import {GameStarting} from "../../open-api/generated/pathological-typescript-api/models/GameStarting"
+import {GameStarted} from "../../open-api/generated/pathological-typescript-api/models/GameStarted"
+import {PlayerJoin} from "../../open-api/generated/pathological-typescript-api/models/PlayerJoin"
+import {PlayerLeft} from "../../open-api/generated/pathological-typescript-api/models/PlayerLeft"
 
 const controller = new MutliplayerController();
 
@@ -80,46 +83,53 @@ function preInitializeListener(gameId: string, playerId: string): Socket {
             "game_id": gameId
         }
     });
+    registerListener(
+        socket,
+        PlayerJoin.name,
+        (eventData: PlayerJoin) => {
 
-
-
-    socket.on("player_join_event", (eventData) => {
-
-        if (gameId === eventData["game_id"]) {
-            console.log("Recieved relevant player join event!");
-            console.log("Updating lobby!");
-            hideHtmlElement("start-mutliplayer-game-div");
-            updateLobby(gameId, eventData);
-        } else {
-            console.log("Recieved irrelevant player join event!");
+            if (gameId === eventData["game_id"]) {
+                console.log("Recieved relevant player join event!");
+                console.log("Updating lobby!");
+                hideHtmlElement("start-mutliplayer-game-div");
+                updateLobby(gameId, eventData);
+            } else {
+                console.log("Recieved irrelevant player join event!");
+            }
         }
+    )
+    registerListener(
+        socket,
+        PlayerLeft.name,
+        (eventData: PlayerLeft) => {
 
-    })
-
-    socket.on("player_left_game", (eventData) => {
-
-        if (gameId === eventData["game_id"]) {
-            console.log("Recieved relevant player left event!");
-            console.log("Updating lobby!");
-            hideHtmlElement("start-mutliplayer-game-div");
-            updateLobby(gameId, eventData);
-        } else {
-            console.log("Recieved irrelevant player join event!");
+            if (gameId === eventData.gameId) {
+                console.log("Recieved relevant player left event!");
+                console.log("Updating lobby!");
+                hideHtmlElement("start-mutliplayer-game-div");
+                updateLobby(gameId, eventData);
+            } else {
+                console.log("Recieved irrelevant player join event!");
+            }
         }
-    })
-
-
-    socket.on("game_starting", (eventData: GameStarting) => {
-        console.log("Recieved game starting event...")
-        document.getElementById("lobby-info-div").innerText = eventData.message;
-    })
-
-    socket.on("game_started", (eventData) => {
-        console.log("Recieved game started event...");
-        hideHtmlElement("mutliplayer-lobby-div");
-        showGameDiv();
-    })
-
+    )
+    registerListener(
+        socket,
+        GameStarting.name,
+        (eventData: GameStarting) => {
+            console.log("Recieved game starting event...")
+            document.getElementById("lobby-info-div").innerText = eventData.message;
+        }
+    )
+    registerListener(
+        socket,
+        GameStarted.name,
+        (evenData: GameStarted) => {
+            console.log("Recieved game started event...");
+            hideHtmlElement("mutliplayer-lobby-div");
+            showGameDiv();
+        }
+    )
     return socket;
 }
 
@@ -148,7 +158,7 @@ function buildPlayerListElement(player: object) {
 
 function bindButton(socket: Socket, lobbyId: string, playerName: string) {
     document.getElementById("start-multiplayer-game-button").onclick = () => {
-        socket.emit("start_game", {
+        socket.emit("StartGame", {
             "game_id": lobbyId,
             "player_id": playerName
         });
@@ -162,6 +172,14 @@ function hideHtmlElement(elementId: string) {
 function showGameDiv() {
     const gameDiv = document.getElementById("multiplayer-game-div");
     gameDiv.setAttribute("style", "display: block");
+}
 
+function registerListener<T>(socket: Socket, eventName: string, eventConsumer: (event: T) => void ) {
+    console.log(`Registering listener for ${eventName}`)
+    socket.on(eventName,
+        (event: T) => {
+            eventConsumer(event)
+        }
+    );
 }
 

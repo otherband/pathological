@@ -5,7 +5,7 @@ import { hostApi } from "./config";
 const CLIENT_JOIN_GAME = "client_join_game"
 const NEW_PLAYER_JOINED = "new_player_joined";
 const SUCCESSFUL_JOIN = "successful_join";
-const LOBBY_DIV = "mutliplayer-lobby-div";
+const LOBBY_DIV = "multiplayer-lobby-div";
 
 
 export function sendJoinGameEvent(playerName: string, gameId: string) {

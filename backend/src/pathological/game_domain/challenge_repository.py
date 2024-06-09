@@ -10,7 +10,7 @@ class ChallengeRepository(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def get_challenge_by_id(self, challenge_id: str):
+    def get_challenge_by_id(self, challenge_id: str) -> Challenge:
         pass
 
 

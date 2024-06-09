@@ -24,11 +24,15 @@ components:
   schemas:
     MultiplayerGameEvent:
       type: object
-    BasicPlayerData:
+    PlayerData:
       type: object
       properties:
         player_id:
           type: string
+        current_challenge_id:
+          type: string
+        current_score:
+          type: integer
     GameStarting:
       allOf:
         - $ref: '#/components/schemas/MultiplayerGameEvent'
@@ -39,7 +43,7 @@ components:
             connected_players:
               type: array
               items:
-                $ref: '#/components/schemas/BasicPlayerData'
+                $ref: '#/components/schemas/PlayerData'
             start_game_delay:
               type: integer
             message:
@@ -54,7 +58,7 @@ components:
             connected_players:
               type: array
               items:
-                $ref: '#/components/schemas/BasicPlayerData'
+                $ref: '#/components/schemas/PlayerData'
             message:
               type: string
     ChallengeRequested:
@@ -93,7 +97,7 @@ components:
             connected_players:
               type: array
               items:
-                $ref: '#/components/schemas/BasicPlayerData'
+                $ref: '#/components/schemas/PlayerData'
     PlayerLeft:
       allOf:
         - $ref: '#/components/schemas/MultiplayerGameEvent'
@@ -106,4 +110,15 @@ components:
             connected_players:
               type: array
               items:
-                $ref: '#/components/schemas/BasicPlayerData'
+                $ref: '#/components/schemas/PlayerData'
+    UpdatePlayersData:
+      allOf:
+        - $ref: '#/components/schemas/MultiplayerGameEvent'
+        - type: object
+          properties:
+            game_id:
+              type: string
+            connected_players:
+              type: array
+              items:
+                $ref: '#/components/schemas/PlayerData'

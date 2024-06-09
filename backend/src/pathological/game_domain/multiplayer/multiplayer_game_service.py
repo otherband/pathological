@@ -1,4 +1,4 @@
-import time
+from typing import List
 
 from pathological.app_config.game_parameters import GAME_PARAMETERS
 from pathological.events.event_dispatcher import EventDispatcher
@@ -7,13 +7,8 @@ from pathological.exceptions.user_input_exception import UserInputException
 from pathological.game_domain.challenge_repository import ChallengeRepository, DummyChallengeRepository
 from pathological.game_domain.multiplayer.multiplayer_game_repository import MultiplayerGameRepository, \
     EmbeddedMultiplayerGameRepository
-from pathological.models.game_models import MultiplayerGame, PlayerSession
-from openapi_client.models.game_starting import GameStarting
-from openapi_client.models.challenge_requested import ChallengeRequested
-from openapi_client.models.player_join import PlayerJoin
-from openapi_client.models.player_left import PlayerLeft
-from openapi_client.models.game_started import GameStarted
-from openapi_client.models.submit_answer import SubmitAnswer
+from pathological.models.game_models import MultiplayerGame, MultiplayerPlayerData
+from pathological.open_api.event_models import *
 
 
 class MultiplayerGameService:
@@ -34,11 +29,9 @@ class MultiplayerGameService:
         if self._game_repository.exists(game_id):
             raise UserInputException(f"Game with ID {game_id} already exists.")
         game = MultiplayerGame(game_id=game_id,
-                               connected_players=[PlayerSession(
+                               connected_players=[MultiplayerPlayerData.new(
                                    player_id=player_id,
-                                   timestamp_start=time.time(),
-                                   challenges_faced=set(),
-                                   challenges_solved=set()
+                                   game_id=game_id
                                )],
                                running=False)
         self._game_repository.update_game(game)
@@ -52,18 +45,13 @@ class MultiplayerGameService:
         if player_id in [p.player_id for p in game.connected_players]:
             raise UserInputException(f"Name '{player_id}' is already taken in the game '{game_id}'.")
 
-        game.connected_players.append(PlayerSession(
-            challenges_solved=set(),
-            challenges_faced=set(),
-            player_id=player_id,
-            timestamp_start=time.time()
-        ))
+        game.connected_players.append(MultiplayerPlayerData.new(player_id=player_id, game_id=game_id))
         self._game_repository.update_game(game)
 
         event = PlayerJoin()
         event.player_id = player_id
         event.game_id = game_id
-        event.connected_players = game.get_truncated_player_objects()
+        event.connected_players = self._to_player_data_objects(game)
 
         self._event_dispatcher.dispatch(event)
         return game
@@ -80,7 +68,7 @@ class MultiplayerGameService:
         event = PlayerLeft()
         event.player_id = player_id
         event.game_id = game_id
-        event.connected_players = game.get_truncated_player_objects()
+        event.connected_players = self._to_player_data_objects(game)
         self._event_dispatcher.dispatch(event)
 
         return game
@@ -96,7 +84,7 @@ class MultiplayerGameService:
 
         starting_event = GameStarting()
         starting_event.game_id = game_id
-        starting_event.connected_players = game.get_truncated_player_objects()
+        starting_event.connected_players = self._to_player_data_objects(game)
         starting_event.start_game_delay = delay
         starting_event.message = f"Game starting in {delay} seconds..."
 
@@ -109,24 +97,34 @@ class MultiplayerGameService:
 
         return game
 
-    def get_challenge(self, game_id: str, player_id: str):
+    def get_next_challenge(self,
+                           game_id: str,
+                           player_id: str,
+                           answer_to_previous: str):
+
         game = self._from_verified_pair(game_id, player_id)
-
         player = [p for p in game.connected_players if p.player_id == player_id][0]
+
+        self._register_previous_answer(player, answer_to_previous)
+
         challenge = self._challenge_repository.get_random_challenge(excluded=player.challenges_faced)
+        player.current_challenge_id = challenge.challenge_id
+        player.challenges_faced.add(challenge.challenge_id)
 
-        event = ChallengeRequested()
-        event.player_id = player_id
+        self._game_repository.update_game(game)
+
+        event = UpdatePlayersData()
+
         event.game_id = game_id
-        event.challenge_id = challenge.challenge_id
+        event.connected_players = self._to_player_data_objects(game)
+
         self._event_dispatcher.dispatch(event)
 
-    def submit_answer(self, game_id: str, player_id: str, challenge_id: str):
-        event = SubmitAnswer()
-        event.game_id = game_id
-        event.player_id = player_id
-        event.challenge_id = challenge_id
-        self._event_dispatcher.dispatch(event)
+    def _register_previous_answer(self, player: MultiplayerPlayerData, answer_to_previous: str):
+        if player.current_challenge_id:
+            previous_challenge = self._challenge_repository.get_challenge_by_id(player.current_challenge_id)
+            if previous_challenge.correct_answer == answer_to_previous:
+                player.current_score += 1
 
     def _get_delay(self) -> int:
         """Override for tests!"""
@@ -138,10 +136,20 @@ class MultiplayerGameService:
 
         event = GameStarted()
         event.game_id = game_id
-        event.connected_players = game.get_truncated_player_objects()
+        event.connected_players = self._to_player_data_objects(game)
         event.message = "Game started!"
 
         self._event_dispatcher.dispatch(event)
+
+    def _to_player_data_objects(self, game: MultiplayerGame) -> List[PlayerData]:
+        result = []
+        for player in game.connected_players:
+            data = PlayerData()
+            data.player_id = player.player_id
+            data.current_challenge_id = player.current_challenge_id
+            data.current_score = player.current_score
+            result.append(data)
+        return result
 
     def _from_verified_pair(self, game_id: str, player_id: str) -> MultiplayerGame:
         self._verify_exists(game_id)
@@ -149,7 +157,7 @@ class MultiplayerGameService:
         self._verify_player_in(game, game_id, player_id)
         return game
 
-    def _verify_player_in(self, game, game_id, player_id):
+    def _verify_player_in(self, game: MultiplayerGame, game_id: str, player_id: str):
         if player_id not in game.get_connected_ids():
             raise UserInputException(f"Name '{player_id}' is not in the game '{game_id}'.")
 

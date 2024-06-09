@@ -2,7 +2,7 @@ import { hostApi } from "./config";
 
 const BASE_URL = hostApi.concat("/api/v1");
 
-export class MutliplayerController {
+export class multiplayerController {
     async createGame(gameId: string, playerId: string): Promise<Response> {
         return await (
             await fetch(BASE_URL.concat("/multiplayer/game"), {

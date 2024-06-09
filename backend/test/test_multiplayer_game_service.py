@@ -66,10 +66,14 @@ class MultiplayerGameServiceTest(unittest.TestCase):
             "player_id": "player_2",
             "game_id": "game_2",
             "connected_players": [{
-                "player_id": "player_1"
+                "player_id": "player_1",
+                "current_score": 0,
+                "current_challenge_id": ""
             },
                 {
-                    "player_id": "player_2"
+                    "player_id": "player_2",
+                    "current_score": 0,
+                    "current_challenge_id": ""
                 }]
         }, latest_event["event_data"])
         self.assertEqual(NO_DELAY, self.event_dispatcher.latest_delay)
@@ -85,7 +89,10 @@ class MultiplayerGameServiceTest(unittest.TestCase):
         self.assertEqual({
             "game_id": "game13",
             "player_id": "player2",
-            "connected_players": [{"player_id": "player1"}]
+            "connected_players": [{"player_id": "player1",
+                                   "current_score": 0,
+                                   "current_challenge_id": ""
+                                   }]
         }, latest_event["event_data"])
         self.assertEqual(NO_DELAY, self.event_dispatcher.latest_delay)
 
@@ -99,7 +106,9 @@ class MultiplayerGameServiceTest(unittest.TestCase):
         self.assertEqual({
             "game_id": "game42",
             "connected_players": [{
-                "player_id": "player1"
+                "player_id": "player1",
+                "current_score": 0,
+                "current_challenge_id": ""
             }],
             "start_game_delay": 0,
             "message": "Game starting in 0 seconds..."
@@ -111,36 +120,32 @@ class MultiplayerGameServiceTest(unittest.TestCase):
         self.assertEqual({
             "game_id": "game42",
             "connected_players": [{
-                "player_id": "player1"
+                "player_id": "player1",
+                "current_score": 0,
+                "current_challenge_id": ""
             }],
             "message": "Game started!"
         }, last_event["event_data"])
 
     def test_full_game(self):
-        game = self.game_service.create_game("game_full", "player_1")
-
+        self.game_service.create_game("game_full", "player_1")
         self.game_service.join_game("game_full", "player_2")
         self.game_service.join_game("game_full", "player_3")
 
         self.game_service.trigger_game_starting("game_full")
-
-        self.game_service.get_challenge("game_full", "player_1")
+        self.game_service.get_next_challenge("game_full", "player_1", "")
         event = self._get_latest_event()
-        self.assertEqual("ChallengeRequested", event["event_name"])
-        self.assertEqual("player_1", event["event_data"]["player_id"])
-        self.assertEqual("game_full", event["event_data"]["game_id"])
-        self.assertTrue("challenge_id" in event["event_data"].keys())
+        self.assertEqual("UpdatePlayersData", event["event_name"])
+        self.assertTrue("connected_players" in event["event_data"].keys())
 
-        self.game_service.submit_answer("game_full", "player_1", event["event_data"]["challenge_id"])
+        self.game_service.get_next_challenge("game_full",
+                                             "player_1",
+                                             "death")
 
         event = self._get_latest_event()
-        self.assertEqual("SubmitAnswer", event["event_name"])
-        self.assertEqual({
-            "player_1": 1,
-            "player_2": 0,
-            "player_3": 0
-        }, event["event_data"]["players_scores"])
-        self.assertTrue("players_current_challenges" in event["event_data"].keys())
+        self.assertEqual("UpdatePlayersData", event["event_name"])
+        self.assertEqual(1, event["event_data"]["connected_players"][0]["current_score"])
+        self.assertEqual(0, event["event_data"]["connected_players"][1]["current_score"])
 
     def _get_latest_event(self):
         latest_event = self.event_dispatcher.dispatched_events[-1]

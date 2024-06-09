@@ -108,7 +108,7 @@ function sleep(ms: number): Promise<void> {
 }
 
 function showStartMultiplayerDiv() {
-  document.getElementById("start-mutliplayer-game-div").setAttribute("style", "display: block")
+  document.getElementById("start-multiplayer-game-div").setAttribute("style", "display: block")
 }
 
 export { startGame, createMultiplayerGame,

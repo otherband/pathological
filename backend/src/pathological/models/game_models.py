@@ -20,9 +20,28 @@ class PlayerSession:
 
 
 @define
+class MultiplayerPlayerData:
+    game_id: str
+    player_id: str
+    current_challenge_id: str
+    current_score: int
+    challenges_faced: Set[str]
+
+    @classmethod
+    def new(cls, game_id: str, player_id: str):
+        return MultiplayerPlayerData(
+            game_id=game_id,
+            player_id=player_id,
+            current_challenge_id="",
+            current_score=0,
+            challenges_faced=set()
+        )
+
+
+@define
 class MultiplayerGame:
     game_id: str
-    connected_players: List[PlayerSession]
+    connected_players: List[MultiplayerPlayerData]
     running: bool
 
     def get_connected_ids(self):

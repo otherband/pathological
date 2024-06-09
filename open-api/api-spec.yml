@@ -31,6 +31,8 @@ components:
           type: string
         current_challenge_id:
           type: string
+        current_image_id:
+          type: string
         current_challenge_options:
           type: array
           items:

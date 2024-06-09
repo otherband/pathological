@@ -25,6 +25,7 @@ class MultiplayerPlayerData:
     player_id: str
     current_challenge_id: str
     current_challenge_options: List[str]
+    current_image_id: str
     current_score: int
     challenges_faced: Set[str]
 
@@ -36,6 +37,7 @@ class MultiplayerPlayerData:
             current_challenge_id="",
             current_score=0,
             challenges_faced=set(),
+            current_image_id="",
             current_challenge_options=[]
         )
 

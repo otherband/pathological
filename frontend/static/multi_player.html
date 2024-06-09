@@ -13,7 +13,7 @@
     <h3>Pathological Multiplayer</h3>
   </div>
 
-  <div id="start-mutliplayer-game-div" class="text-center p-5 w-50 container" style="display: none;">
+  <div id="start-multiplayer-game-div" class="text-center p-5 w-50 container">
     <form id="start-multiplayer-game-form" class="form-control p-3 m-3">
       <div class="w-50 container">
         <input name="player-name" class="form-control m-1" id="multiplayer-player-name-input" type="text" required>
@@ -39,7 +39,7 @@
 
   </div>
 
-  <div class="container w-50 justify-content-center" id="mutliplayer-lobby-div" style="display: none;">
+  <div class="container w-50 justify-content-center" id="multiplayer-lobby-div" style="display: none;">
 
     <div class="border p-5">
       <div class="text-lg-center">
@@ -56,22 +56,26 @@
     </div>
   </div>
 
-  <div id="multiplayer-game-div">
+  <div id="multiplayer-game-div" style="display: none;">
     <div class="container">
       <div class="row">
         <div class="col">
-          <div class="text-center" id="enemy-div-1">
-            <h6>Enemy 1</h6>
-            <p>Score: 0</p>
-            <img src="path1.jpeg" class="w-25">
+          <div id="rival-placeholder-1">
+            <div class="text-center" id="enemy-div-1">
+              <h6>Enemy 1</h6>
+              <p>Score: 0</p>
+              <img src="path1.jpeg" class="w-25">
+            </div>
           </div>
         </div>
         <div class="col"></div>
         <div class="col">
-          <div class="text-center" id="enemy-div-2">
-            <h6>Enemy 2</h6>
-            <p>Score: 0</p>
-            <img src="path1.jpeg" class="w-25">
+          <div id="rival-placeholder-2">
+            <div class="text-center" id="enemy-div-2">
+              <h6>Enemy 2</h6>
+              <p>Score: 0</p>
+              <img src="path1.jpeg" class="w-25">
+            </div>
           </div>
         </div>
       </div>
@@ -79,9 +83,9 @@
         <div class="col"></div>
         <div class="col col-lg-10">
           <div id="this-player-div" class="text-center">
-            <h4>Score: 0 | Remaining time: <span id="remaining-time-span">60</span></h4>
+            <h4>Score: <span id="this-player-score-span">0</span> | Remaining time: <span id="remaining-time-span">60</span></h4>
             <div class="text-center" id="current-challenge-div">
-              <img src="path1.jpeg" id="this-player-current-challenge-img" class="w-25">
+              <img src="path1.jpeg" id="this-player-current-challenge-img" class="w-50">
             </div>
             <div id="this-player-options">
               <div>
@@ -100,18 +104,22 @@
       </div>
       <div class="row">
         <div class="col">
-          <div class="text-center" id="enemy-div-3">
-            <h6>Enemy 3</h6>
-            <p>Score: 0</p>
-            <img src="path1.jpeg" class="w-25">
+          <div id="rival-placeholder-3">
+            <div class="text-center" id="enemy-div-3">
+              <h6>Enemy 3</h6>
+              <p>Score: 0</p>
+              <img src="path1.jpeg" class="w-25">
+            </div>
           </div>
         </div>
         <div class="col"></div>
         <div class="col">
-          <div class="text-center" id="enemy-div-4">
-            <h6>Enemy 4</h6>
-            <p>Score: 0</p>
-            <img src="path1.jpeg" class="w-25">
+          <div id="rival-placeholder-4">
+            <div class="text-center" id="enemy-div-4">
+              <h6>Enemy 4</h6>
+              <p>Score: 0</p>
+              <img src="path1.jpeg" class="w-25">
+            </div>
           </div>
         </div>
       </div>

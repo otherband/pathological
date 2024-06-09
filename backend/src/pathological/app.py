@@ -86,6 +86,16 @@ def start_multiplayer_game(event_data: dict):
     )
 
 
+@app_with_sockets.on("SubmitAnswer")
+def submit_answer(event_data: dict):
+    print(f"Received a SubmitAnswer event with data {event_data}")
+    multiplayer_game_service.get_next_challenge(
+        game_id=event_data["game_id"],
+        player_id=event_data["player_id"],
+        answer_to_previous=event_data["answer_to_previous"],
+    )
+
+
 @app_with_sockets.on("connect")
 def new_connection():
     session_id = get_session_id()

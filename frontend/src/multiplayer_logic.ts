@@ -7,8 +7,11 @@ import {PlayerJoin} from "../../open-api/generated/pathological-typescript-api/m
 import {PlayerLeft} from "../../open-api/generated/pathological-typescript-api/models/PlayerLeft"
 import {UpdatePlayersData} from "../../open-api/generated/pathological-typescript-api/models/UpdatePlayersData"
 import { PlayerData } from "../../open-api/generated/pathological-typescript-api/models/PlayerData";
+import { GameController } from "./controller";
 
 const controller = new multiplayerController();
+const signlePlayerController = new GameController();
+const urlCreator = window.URL || window.webkitURL;
 
 function resetDiv(div: HTMLElement) {
     div.innerHTML = "";
@@ -129,6 +132,16 @@ function preInitializeListener(gameId: string, playerId: string): Socket {
             console.log("Received game started event...");
             hideHtmlElement("multiplayer-lobby-div");
             showGameDiv();
+
+            socket.emit(
+                "SubmitAnswer", {
+                    "game_id": gameId,
+                    "player_id": playerId,
+                    "answer_to_previous": ""
+                }
+            )
+
+
         }
     )
     
@@ -137,10 +150,10 @@ function preInitializeListener(gameId: string, playerId: string): Socket {
         UpdatePlayersData.name,
         (eventData: UpdatePlayersData) => {
             if (eventData.game_id === gameId) {
-                console.log(`Received relevant update players data event ${eventData}`)
+                console.log(`Received relevant update players data event ${JSON.stringify(eventData)}`)
                 eventData.connected_players.forEach((pData) => {
-                    if (pData === playerId) {
-                        updateThisPlayerDiv(pData);
+                    if (pData.player_id === playerId) {
+                        updateThisPlayerDiv(socket, gameId, pData);
                     } else {
                         updateOtherPlayerDiv(pData);
                     }
@@ -206,10 +219,39 @@ function registerListener<T>(socket: Socket, eventName: string, eventConsumer: (
     );
 }
 
-function updateThisPlayerDiv(pData: PlayerData) {
-    document.getElementById("")
+function updateThisPlayerDiv(socket: Socket, gameId: string, pData: PlayerData) {
+    signlePlayerController.getChallengeImage(pData.current_image_id).then((blob) => {
+        const imageElement = document.getElementById("this-player-current-challenge-img") as HTMLImageElement
+        imageElement.src = urlCreator.createObjectURL(blob);
+      });
+
+      document.getElementById("this-player-score-span").textContent = pData.current_score?.toString();
+      const allOptionsDiv = document.getElementById("this-player-options");
+      allOptionsDiv.innerHTML = "";
+      pData.current_challenge_options.forEach((option) => {
+        const thisOptionDiv = document.createElement("div");
+
+        const optionButton = document.createElement("button");
+        optionButton.classList.add("btn", "btn-danger", "w-25", "m-2");
+        optionButton.innerText = option;
+        optionButton.onclick = () => {
+
+            socket.emit(
+                "SubmitAnswer", {
+                    "game_id": gameId,
+                    "player_id": pData.player_id,
+                    "answer_to_previous": option
+                }
+            )
+
+        }
+
+        thisOptionDiv.appendChild(optionButton);
+        
+        allOptionsDiv.appendChild(thisOptionDiv);
+      })
+      
 }
 function updateOtherPlayerDiv(pData: PlayerData) {
-    throw new Error("Function not implemented.");
 }
 

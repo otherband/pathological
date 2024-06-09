@@ -109,6 +109,7 @@ class MultiplayerGameService:
 
         challenge = self._challenge_repository.get_random_challenge(excluded=player.challenges_faced)
         player.current_challenge_id = challenge.challenge_id
+        player.current_image_id = challenge.image_id
         player.current_challenge_options = list(challenge.possible_answers)
         player.challenges_faced.add(challenge.challenge_id)
 
@@ -150,6 +151,7 @@ class MultiplayerGameService:
             data.current_challenge_id = player.current_challenge_id
             data.current_score = player.current_score
             data.current_challenge_options = player.current_challenge_options
+            data.current_image_id = player.current_image_id
             result.append(data)
         return result
 

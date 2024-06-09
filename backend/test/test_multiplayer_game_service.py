@@ -68,12 +68,14 @@ class MultiplayerGameServiceTest(unittest.TestCase):
             "connected_players": [{
                 "player_id": "player_1",
                 "current_score": 0,
+                "current_image_id": "",
                 "current_challenge_id": "",
                 "current_challenge_options": []
             },
                 {
                     "player_id": "player_2",
                     "current_score": 0,
+                    "current_image_id": "",
                     "current_challenge_id": "",
                     "current_challenge_options": []
                 }]
@@ -93,6 +95,7 @@ class MultiplayerGameServiceTest(unittest.TestCase):
             "player_id": "player2",
             "connected_players": [{"player_id": "player1",
                                    "current_score": 0,
+                                   "current_image_id": "",
                                    "current_challenge_id": "",
                                    "current_challenge_options": []
                                    }]
@@ -111,6 +114,7 @@ class MultiplayerGameServiceTest(unittest.TestCase):
             "connected_players": [{
                 "player_id": "player1",
                 "current_score": 0,
+                "current_image_id": "",
                 "current_challenge_id": "",
                 "current_challenge_options": []
             }],
@@ -126,6 +130,7 @@ class MultiplayerGameServiceTest(unittest.TestCase):
             "connected_players": [{
                 "player_id": "player1",
                 "current_score": 0,
+                "current_image_id": "",
                 "current_challenge_id": "",
                 "current_challenge_options": []
             }],

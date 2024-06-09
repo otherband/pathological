@@ -1,16 +1,16 @@
 import { Socket, io } from "socket.io-client";
 import { hostApi } from "./config";
 import { multiplayerController } from "./multiplayer_controller";
-import {GameStarting} from "../../open-api/generated/pathological-typescript-api/models/GameStarting"
-import {GameStarted} from "../../open-api/generated/pathological-typescript-api/models/GameStarted"
-import {PlayerJoin} from "../../open-api/generated/pathological-typescript-api/models/PlayerJoin"
-import {PlayerLeft} from "../../open-api/generated/pathological-typescript-api/models/PlayerLeft"
-import {UpdatePlayersData} from "../../open-api/generated/pathological-typescript-api/models/UpdatePlayersData"
+import { GameStarting } from "../../open-api/generated/pathological-typescript-api/models/GameStarting"
+import { GameStarted } from "../../open-api/generated/pathological-typescript-api/models/GameStarted"
+import { PlayerJoin } from "../../open-api/generated/pathological-typescript-api/models/PlayerJoin"
+import { PlayerLeft } from "../../open-api/generated/pathological-typescript-api/models/PlayerLeft"
+import { UpdatePlayersData } from "../../open-api/generated/pathological-typescript-api/models/UpdatePlayersData"
 import { PlayerData } from "../../open-api/generated/pathological-typescript-api/models/PlayerData";
 import { GameController } from "./controller";
 
 const controller = new multiplayerController();
-const signlePlayerController = new GameController();
+const singlePlayerController = new GameController();
 const urlCreator = window.URL || window.webkitURL;
 
 function resetDiv(div: HTMLElement) {
@@ -135,16 +135,16 @@ function preInitializeListener(gameId: string, playerId: string): Socket {
 
             socket.emit(
                 "SubmitAnswer", {
-                    "game_id": gameId,
-                    "player_id": playerId,
-                    "answer_to_previous": ""
-                }
+                "game_id": gameId,
+                "player_id": playerId,
+                "answer_to_previous": ""
+            }
             )
 
 
         }
     )
-    
+
     registerListener(
         socket,
         UpdatePlayersData.name,
@@ -152,10 +152,11 @@ function preInitializeListener(gameId: string, playerId: string): Socket {
             if (eventData.game_id === gameId) {
                 console.log(`Received relevant update players data event ${JSON.stringify(eventData)}`)
                 eventData.connected_players.forEach((pData) => {
+                    let currOtherIndex = 0;
                     if (pData.player_id === playerId) {
                         updateThisPlayerDiv(socket, gameId, pData);
                     } else {
-                        updateOtherPlayerDiv(pData);
+                        updateOtherPlayerDiv(currOtherIndex++, pData);
                     }
                 })
             } else {
@@ -210,7 +211,7 @@ function showGameDiv() {
     gameDiv.setAttribute("style", "display: block");
 }
 
-function registerListener<T>(socket: Socket, eventName: string, eventConsumer: (event: T) => void ) {
+function registerListener<T>(socket: Socket, eventName: string, eventConsumer: (event: T) => void) {
     console.log(`Registering listener for ${eventName}`)
     socket.on(eventName,
         (event: T) => {
@@ -220,15 +221,15 @@ function registerListener<T>(socket: Socket, eventName: string, eventConsumer: (
 }
 
 function updateThisPlayerDiv(socket: Socket, gameId: string, pData: PlayerData) {
-    signlePlayerController.getChallengeImage(pData.current_image_id).then((blob) => {
+    singlePlayerController.getChallengeImage(pData.current_image_id).then((blob) => {
         const imageElement = document.getElementById("this-player-current-challenge-img") as HTMLImageElement
         imageElement.src = urlCreator.createObjectURL(blob);
-      });
+    });
 
-      document.getElementById("this-player-score-span").textContent = pData.current_score?.toString();
-      const allOptionsDiv = document.getElementById("this-player-options");
-      allOptionsDiv.innerHTML = "";
-      pData.current_challenge_options.forEach((option) => {
+    document.getElementById("this-player-score-span").textContent = pData.current_score?.toString();
+    const allOptionsDiv = document.getElementById("this-player-options");
+    allOptionsDiv.innerHTML = "";
+    pData.current_challenge_options.forEach((option) => {
         const thisOptionDiv = document.createElement("div");
 
         const optionButton = document.createElement("button");
@@ -238,20 +239,42 @@ function updateThisPlayerDiv(socket: Socket, gameId: string, pData: PlayerData) 
 
             socket.emit(
                 "SubmitAnswer", {
-                    "game_id": gameId,
-                    "player_id": pData.player_id,
-                    "answer_to_previous": option
-                }
+                "game_id": gameId,
+                "player_id": pData.player_id,
+                "answer_to_previous": option
+            }
             )
 
         }
 
         thisOptionDiv.appendChild(optionButton);
-        
+
         allOptionsDiv.appendChild(thisOptionDiv);
-      })
-      
+    })
+
 }
-function updateOtherPlayerDiv(pData: PlayerData) {
+function updateOtherPlayerDiv(otherIndex: number, pData: PlayerData) {
+    const enemyDiv = document.getElementById(`rival-placeholder-${otherIndex}`);
+    enemyDiv.classList.add("text-center")
+
+    resetDiv(enemyDiv);
+
+    const enemyNameHeader = document.createElement("h6");
+    enemyNameHeader.innerText = pData.player_id
+    enemyDiv.appendChild(enemyNameHeader)
+
+    const playerScoreElement = document.createElement("p");
+    playerScoreElement.innerText = `Score: ${pData.current_score}`
+    enemyDiv.appendChild(playerScoreElement);
+
+    const imageDiv = document.createElement("img");
+    imageDiv.classList.add("w-25")
+
+    singlePlayerController.getChallengeImage(pData.current_image_id).then((blob) => {
+        imageDiv.src = urlCreator.createObjectURL(blob);
+    });
+
+    enemyDiv.appendChild(imageDiv);
+
 }
 

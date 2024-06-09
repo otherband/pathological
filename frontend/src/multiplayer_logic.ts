@@ -5,6 +5,8 @@ import {GameStarting} from "../../open-api/generated/pathological-typescript-api
 import {GameStarted} from "../../open-api/generated/pathological-typescript-api/models/GameStarted"
 import {PlayerJoin} from "../../open-api/generated/pathological-typescript-api/models/PlayerJoin"
 import {PlayerLeft} from "../../open-api/generated/pathological-typescript-api/models/PlayerLeft"
+import {UpdatePlayersData} from "../../open-api/generated/pathological-typescript-api/models/UpdatePlayersData"
+import { PlayerData } from "../../open-api/generated/pathological-typescript-api/models/PlayerData";
 
 const controller = new multiplayerController();
 
@@ -129,6 +131,28 @@ function preInitializeListener(gameId: string, playerId: string): Socket {
             showGameDiv();
         }
     )
+    
+    registerListener(
+        socket,
+        UpdatePlayersData.name,
+        (eventData: UpdatePlayersData) => {
+            if (eventData.game_id === gameId) {
+                console.log(`Received relevant update players data event ${eventData}`)
+                eventData.connected_players.forEach((pData) => {
+                    if (pData === playerId) {
+                        updateThisPlayerDiv(pData);
+                    } else {
+                        updateOtherPlayerDiv(pData);
+                    }
+                })
+            } else {
+                console.log(`Irrelevant update players data event: ${eventData}`)
+            }
+
+        }
+    )
+
+
     return socket;
 }
 
@@ -180,5 +204,12 @@ function registerListener<T>(socket: Socket, eventName: string, eventConsumer: (
             eventConsumer(event)
         }
     );
+}
+
+function updateThisPlayerDiv(pData: PlayerData) {
+    document.getElementById("")
+}
+function updateOtherPlayerDiv(pData: PlayerData) {
+    throw new Error("Function not implemented.");
 }
 

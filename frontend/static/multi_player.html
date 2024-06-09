@@ -13,7 +13,7 @@
     <h3>Pathological Multiplayer</h3>
   </div>
 
-  <div id="start-multiplayer-game-div" class="text-center p-5 w-50 container" style="display: none;">
+  <div id="start-mutliplayer-game-div" class="text-center p-5 w-50 container" style="display: none;">
     <form id="start-multiplayer-game-form" class="form-control p-3 m-3">
       <div class="w-50 container">
         <input name="player-name" class="form-control m-1" id="multiplayer-player-name-input" type="text" required>
@@ -39,7 +39,7 @@
 
   </div>
 
-  <div class="container w-50 justify-content-center" id="multiplayer-lobby-div" style="display: none;">
+  <div class="container w-50 justify-content-center" id="mutliplayer-lobby-div" style="display: none;">
 
     <div class="border p-5">
       <div class="text-lg-center">
@@ -50,13 +50,10 @@
       </ul>
       <div id="lobby-info-div" class="border p-4 m-3">
       </div>
-
       <button id="start-multiplayer-game-button" class="btn btn-danger m-2" type="button">
         Start multiplayer game
       </button>
-
     </div>
-
   </div>
 
   <div id="multiplayer-game-div">
@@ -84,7 +81,7 @@
           <div id="this-player-div" class="text-center">
             <h4>Score: 0 | Remaining time: <span id="remaining-time-span">60</span></h4>
             <div class="text-center" id="current-challenge-div">
-              <img src="path1.jpeg" class="w-25">
+              <img src="path1.jpeg" id="this-player-current-challenge-img" class="w-25">
             </div>
             <div id="this-player-options">
               <div>
@@ -97,7 +94,7 @@
                 <button class="btn btn-danger w-25 m-2">Option C</button>
               </div>
             </div>
-          </div>      
+          </div>
         </div>
         <div class="col"></div>
       </div>

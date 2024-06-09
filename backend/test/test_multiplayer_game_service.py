@@ -68,12 +68,14 @@ class MultiplayerGameServiceTest(unittest.TestCase):
             "connected_players": [{
                 "player_id": "player_1",
                 "current_score": 0,
-                "current_challenge_id": ""
+                "current_challenge_id": "",
+                "current_challenge_options": []
             },
                 {
                     "player_id": "player_2",
                     "current_score": 0,
-                    "current_challenge_id": ""
+                    "current_challenge_id": "",
+                    "current_challenge_options": []
                 }]
         }, latest_event["event_data"])
         self.assertEqual(NO_DELAY, self.event_dispatcher.latest_delay)
@@ -91,7 +93,8 @@ class MultiplayerGameServiceTest(unittest.TestCase):
             "player_id": "player2",
             "connected_players": [{"player_id": "player1",
                                    "current_score": 0,
-                                   "current_challenge_id": ""
+                                   "current_challenge_id": "",
+                                   "current_challenge_options": []
                                    }]
         }, latest_event["event_data"])
         self.assertEqual(NO_DELAY, self.event_dispatcher.latest_delay)
@@ -108,7 +111,8 @@ class MultiplayerGameServiceTest(unittest.TestCase):
             "connected_players": [{
                 "player_id": "player1",
                 "current_score": 0,
-                "current_challenge_id": ""
+                "current_challenge_id": "",
+                "current_challenge_options": []
             }],
             "start_game_delay": 0,
             "message": "Game starting in 0 seconds..."
@@ -122,7 +126,8 @@ class MultiplayerGameServiceTest(unittest.TestCase):
             "connected_players": [{
                 "player_id": "player1",
                 "current_score": 0,
-                "current_challenge_id": ""
+                "current_challenge_id": "",
+                "current_challenge_options": []
             }],
             "message": "Game started!"
         }, last_event["event_data"])
@@ -137,6 +142,7 @@ class MultiplayerGameServiceTest(unittest.TestCase):
         event = self._get_latest_event()
         self.assertEqual("UpdatePlayersData", event["event_name"])
         self.assertTrue("connected_players" in event["event_data"].keys())
+        self.assertTrue("death" in event["event_data"]["connected_players"][0]["current_challenge_options"])
 
         self.game_service.get_next_challenge("game_full",
                                              "player_1",

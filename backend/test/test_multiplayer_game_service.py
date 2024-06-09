@@ -8,6 +8,8 @@ from pathological.events.task_scheduler import TaskScheduler
 from pathological.exceptions.user_input_exception import UserInputException
 from pathological.game_domain.multiplayer.multiplayer_game_service import MultiplayerGameService
 
+CORRECT_ANSWER = "death"
+
 NO_DELAY = -1
 
 
@@ -26,21 +28,36 @@ class DummyEventDispatcher(EventDispatcher):
 
 
 class TestableMultiplayerGameService(MultiplayerGameService):
+    start_game_delay = 0
+    delete_game_delay = 0
+    end_game_delay = 5
+
     def _get_delay(self):
         return 0
 
 
 class DummyTaskScheduler(TaskScheduler):
+    def __init__(self):
+        self.scheduled_tasks: List[callable] = []
 
     def run_after(self, seconds_delay: int, f: Callable) -> None:
-        f()
+        self.scheduled_tasks.append(f)
+
+    def run_latest(self):
+        latest_function = self.scheduled_tasks[-1]
+        latest_function()
+
+    def run_all(self):
+        for func in self.scheduled_tasks:
+            func()
 
 
 class MultiplayerGameServiceTest(unittest.TestCase):
     def setUp(self):
         self.event_dispatcher = DummyEventDispatcher()
+        self.task_scheduler = DummyTaskScheduler()
         self.game_service = TestableMultiplayerGameService(event_dispatcher=self.event_dispatcher,
-                                                           task_scheduler=DummyTaskScheduler()
+                                                           task_scheduler=self.task_scheduler
                                                            )
 
     def test_create_game(self):
@@ -105,6 +122,7 @@ class MultiplayerGameServiceTest(unittest.TestCase):
     def test_trigger_start_game(self):
         self.game_service.create_game("game42", "player1")
         self.game_service.trigger_game_starting("game42")
+        self.task_scheduler.run_latest()  # run delayed start game task!
 
         second_to_last = self.event_dispatcher.dispatched_events[-2]
 
@@ -137,26 +155,49 @@ class MultiplayerGameServiceTest(unittest.TestCase):
             "message": "Game started!"
         }, last_event["event_data"])
 
+        self.task_scheduler.run_latest()  # run delayed end game task!
+
     def test_full_game(self):
         self.game_service.create_game("game_full", "player_1")
         self.game_service.join_game("game_full", "player_2")
         self.game_service.join_game("game_full", "player_3")
 
         self.game_service.trigger_game_starting("game_full")
-        self.game_service.get_next_challenge("game_full", "player_1", "")
+        self.task_scheduler.run_latest()  # run started!
+
+        self.game_service.request_first_challenge("game_full", "player_2")
         event = self._get_latest_event()
         self.assertEqual("UpdatePlayersData", event["event_name"])
         self.assertTrue("connected_players" in event["event_data"].keys())
-        self.assertTrue("death" in event["event_data"]["connected_players"][0]["current_challenge_options"])
+        self.assertTrue(CORRECT_ANSWER in event["event_data"]["connected_players"][1]["current_challenge_options"])
 
         self.game_service.get_next_challenge("game_full",
-                                             "player_1",
-                                             "death")
+                                             "player_2",
+                                             CORRECT_ANSWER)
+        self.game_service.get_next_challenge("game_full",
+                                             "player_2",
+                                             CORRECT_ANSWER)
+        self.game_service.request_first_challenge("game_full",
+                                                  "player_3")
+        self.game_service.get_next_challenge("game_full",
+                                             "player_3",
+                                             CORRECT_ANSWER)
 
         event = self._get_latest_event()
         self.assertEqual("UpdatePlayersData", event["event_name"])
-        self.assertEqual(1, event["event_data"]["connected_players"][0]["current_score"])
-        self.assertEqual(0, event["event_data"]["connected_players"][1]["current_score"])
+        self.assertEqual(0, event["event_data"]["connected_players"][0]["current_score"])
+        self.assertEqual(2, event["event_data"]["connected_players"][1]["current_score"])
+        self.assertEqual(1, event["event_data"]["connected_players"][2]["current_score"])
+
+        self.task_scheduler.run_latest()  # run end game!
+
+        event = self._get_latest_event()
+        self.assertEqual("GameEnded", event["event_name"])
+        ranked_ = event["event_data"]["players_ranked"]
+        self.assertEqual(
+            ["player_2", "player_3", "player_1"],
+            [p["player_id"] for p in ranked_]
+        )
 
     def _get_latest_event(self):
         latest_event = self.event_dispatcher.dispatched_events[-1]

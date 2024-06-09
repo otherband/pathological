@@ -28,11 +28,9 @@ class MultiplayerGameService:
     def create_game(self, game_id: str, player_id: str):
         if self._game_repository.exists(game_id):
             raise UserInputException(f"Game with ID {game_id} already exists.")
+        player = MultiplayerPlayerData.new(player_id=player_id, game_id=game_id)
         game = MultiplayerGame(game_id=game_id,
-                               connected_players=[MultiplayerPlayerData.new(
-                                   player_id=player_id,
-                                   game_id=game_id
-                               )],
+                               connected_players=[player],
                                running=False)
         self._game_repository.update_game(game)
         return game
@@ -48,28 +46,18 @@ class MultiplayerGameService:
         game.connected_players.append(MultiplayerPlayerData.new(player_id=player_id, game_id=game_id))
         self._game_repository.update_game(game)
 
-        event = PlayerJoin()
-        event.player_id = player_id
-        event.game_id = game_id
-        event.connected_players = self._to_player_data_objects(game)
-
-        self._event_dispatcher.dispatch(event)
+        self._publish_join_event(game, game_id, player_id)
         return game
 
     def leave_game(self, game_id: str, player_id: str):
         game = self._from_verified_pair(game_id=game_id, player_id=player_id)
-
         game.connected_players = [p for p in game.connected_players if p.player_id != player_id]
         if len(game.connected_players) == 0:
             self._game_repository.delete_game(game_id)
         else:
             self._game_repository.update_game(game)
 
-        event = PlayerLeft()
-        event.player_id = player_id
-        event.game_id = game_id
-        event.connected_players = self._to_player_data_objects(game)
-        self._event_dispatcher.dispatch(event)
+        self._publish_left_event(game, game_id, player_id)
 
         return game
 
@@ -82,13 +70,7 @@ class MultiplayerGameService:
 
         delay = self._get_delay()
 
-        starting_event = GameStarting()
-        starting_event.game_id = game_id
-        starting_event.connected_players = self._to_player_data_objects(game)
-        starting_event.start_game_delay = delay
-        starting_event.message = f"Game starting in {delay} seconds..."
-
-        self._event_dispatcher.dispatch(starting_event)
+        self._publish_starting_event(delay, game, game_id)
 
         self._task_scheduler.run_after(
             seconds_delay=delay,
@@ -97,12 +79,20 @@ class MultiplayerGameService:
 
         return game
 
+    def request_first_challenge(self, game_id: str, player_id: str):
+        # exists for clarity
+        return self.get_next_challenge(game_id=game_id, player_id=player_id, answer_to_previous="")
+
     def get_next_challenge(self,
                            game_id: str,
                            player_id: str,
                            answer_to_previous: str):
 
         game = self._from_verified_pair(game_id, player_id)
+
+        if not game.running:
+            raise UserInputException(f"Cannot request a challenge because game [{game_id}] is not running...")
+
         player = [p for p in game.connected_players if p.player_id == player_id][0]
 
         self._register_previous_answer(player, answer_to_previous)
@@ -115,11 +105,12 @@ class MultiplayerGameService:
 
         self._game_repository.update_game(game)
 
-        event = UpdatePlayersData()
+        self._publish_updated_event(game, game_id)
 
+    def _publish_updated_event(self, game, game_id):
+        event = UpdatePlayersData()
         event.game_id = game_id
         event.connected_players = self._to_player_data_objects(game)
-
         self._event_dispatcher.dispatch(event)
 
     def _register_previous_answer(self, player: MultiplayerPlayerData, answer_to_previous: str):
@@ -128,19 +119,22 @@ class MultiplayerGameService:
             if previous_challenge.correct_answer == answer_to_previous:
                 player.current_score += 1
 
-    def _get_delay(self) -> int:
-        """Override for tests!"""
-        return GAME_PARAMETERS.start_multiplayer_game_delay_seconds
-
     def _start_game(self, game_id: str):
         self._verify_exists(game_id)
         game = self._game_repository.get_game(game_id)
 
+        self._publish_started_event(game, game_id)
+
+        self._task_scheduler.run_after(
+            seconds_delay=self._get_end_game_delay(),
+            f=lambda: self._end_game(game_id)
+        )
+
+    def _publish_started_event(self, game, game_id):
         event = GameStarted()
         event.game_id = game_id
         event.connected_players = self._to_player_data_objects(game)
         event.message = "Game started!"
-
         self._event_dispatcher.dispatch(event)
 
     def _to_player_data_objects(self, game: MultiplayerGame) -> List[PlayerData]:
@@ -168,3 +162,64 @@ class MultiplayerGameService:
     def _verify_exists(self, game_id):
         if not self._game_repository.exists(game_id):
             raise UserInputException(f"Game with ID {game_id} does not exist.")
+
+    def _end_game(self, game_id: str):
+        self._verify_exists(game_id)
+
+        game = self._game_repository.get_game(game_id)
+        game.running = False
+        self._game_repository.update_game(game)
+
+        self._publish_ended_event(game, game_id)
+
+        def delete_game():
+            self._game_repository.delete_game(game_id)
+
+        self._task_scheduler.run_after(
+            seconds_delay=self._get_delete_game_delay(),
+            f=delete_game
+        )
+
+    def _publish_ended_event(self, game, game_id):
+        event = GameEnded()
+        event.game_id = game_id
+        event.message = "Game ended!"
+        event.players_ranked = self._rank_players(game)
+        self._event_dispatcher.dispatch(event)
+
+    def _get_delay(self) -> int:
+        """Override for tests!"""
+        return GAME_PARAMETERS.start_multiplayer_game_delay_seconds
+
+    def _get_end_game_delay(self) -> int:
+        return 15
+
+    def _get_delete_game_delay(self):
+        return GAME_PARAMETERS.delete_game_after_seconds
+
+    def _rank_players(self, game: MultiplayerGame) -> List[PlayerData]:
+        players = self._to_player_data_objects(game)
+        players.sort(key=lambda p: p.current_score, reverse=True)
+        return players
+
+    def _publish_left_event(self, game: MultiplayerGame, game_id: str, player_id: str):
+        event = PlayerLeft()
+        event.player_id = player_id
+        event.game_id = game_id
+        event.connected_players = self._to_player_data_objects(game)
+        self._event_dispatcher.dispatch(event)
+
+    def _publish_join_event(self, game: MultiplayerGame, game_id: str, player_id: str):
+        event = PlayerJoin()
+        event.player_id = player_id
+        event.game_id = game_id
+        event.connected_players = self._to_player_data_objects(game)
+        self._event_dispatcher.dispatch(event)
+
+    def _publish_starting_event(self, delay, game, game_id):
+        starting_event = GameStarting()
+        starting_event.game_id = game_id
+        starting_event.connected_players = self._to_player_data_objects(game)
+        starting_event.start_game_delay = delay
+        starting_event.message = f"Game starting in {delay} seconds..."
+        self._event_dispatcher.dispatch(starting_event)

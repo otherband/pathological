@@ -67,6 +67,19 @@ components:
                 $ref: '#/components/schemas/PlayerData'
             message:
               type: string
+    GameEnded:
+      allOf:
+        - $ref: '#/components/schemas/MultiplayerGameEvent'
+        - type: object
+          properties:
+            game_id:
+              type: string
+            players_ranked:
+              type: array
+              items:
+                $ref: '#/components/schemas/PlayerData'
+            message:
+              type: string
     ChallengeRequested:
       allOf:
         - $ref: '#/components/schemas/MultiplayerGameEvent'

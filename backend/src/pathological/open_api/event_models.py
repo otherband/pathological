@@ -14,4 +14,6 @@ from openapi_client.models.submit_answer import SubmitAnswer
 from openapi_client.models.update_players_data import UpdatePlayersData
 # noinspection PyUnresolvedReferences
 from openapi_client.models.player_data import PlayerData
+# noinspection PyUnresolvedReferences
+from openapi_client.models.game_ended import GameEnded
 

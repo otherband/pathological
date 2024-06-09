@@ -7,6 +7,7 @@ import { PlayerJoin } from "../../open-api/generated/pathological-typescript-api
 import { PlayerLeft } from "../../open-api/generated/pathological-typescript-api/models/PlayerLeft"
 import { UpdatePlayersData } from "../../open-api/generated/pathological-typescript-api/models/UpdatePlayersData"
 import { PlayerData } from "../../open-api/generated/pathological-typescript-api/models/PlayerData";
+import { GameEnded } from "../../open-api/generated/pathological-typescript-api/models/GameEnded";
 import { GameController } from "./controller";
 
 const controller = new multiplayerController();
@@ -140,8 +141,6 @@ function preInitializeListener(gameId: string, playerId: string): Socket {
                 "answer_to_previous": ""
             }
             )
-
-
         }
     )
 
@@ -151,8 +150,8 @@ function preInitializeListener(gameId: string, playerId: string): Socket {
         (eventData: UpdatePlayersData) => {
             if (eventData.game_id === gameId) {
                 console.log(`Received relevant update players data event ${JSON.stringify(eventData)}`)
+                let currOtherIndex = 0;
                 eventData.connected_players.forEach((pData) => {
-                    let currOtherIndex = 0;
                     if (pData.player_id === playerId) {
                         updateThisPlayerDiv(socket, gameId, pData);
                     } else {
@@ -162,6 +161,22 @@ function preInitializeListener(gameId: string, playerId: string): Socket {
             } else {
                 console.log(`Irrelevant update players data event: ${eventData}`)
             }
+        }
+    )
+
+    registerListener(socket,
+        GameEnded.name,
+        (eventData: GameEnded) => {
+            hideHtmlElement("multiplayer-game-div");
+            const resultDiv = document.getElementById("game-result-div")
+            resultDiv.setAttribute("style", "display: block");
+            
+            eventData.players_ranked.forEach((player) => {
+                const div = document.createElement("div");
+                div.innerText = `${player.player_id}: ${player.current_score} points`
+                resultDiv.appendChild(div);
+            })
+
 
         }
     )
@@ -189,7 +204,7 @@ function showLobby() {
 
 function buildPlayerListElement(player: object) {
     const newPlayerListElement = document.createElement("li");
-    newPlayerListElement.innerText = `Player with ID ${player["player_id"]}`;
+    newPlayerListElement.innerText = player["player_id"];
     return newPlayerListElement;
 }
 

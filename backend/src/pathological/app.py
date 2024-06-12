@@ -1,11 +1,11 @@
 import attrs
 from flask import Flask, request, make_response
 from flask_cors import CORS
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, join_room
 
 from pathological.app_error_handler import register_error_handlers
 from pathological.events.EventletTaskScheduler import EventletTaskScheduler
-from pathological.events.WebSocketsEventDispatcher import WebSocketsEventDispatcher
+from pathological.events.WebSocketsEventDispatcher import WebSocketsGameEventDispatcher
 from pathological.connections.connections_repository import EmbeddedConnectionRepository, ConnectionRepository
 from pathological.game_domain.single_player.game_service import GameService
 from pathological.game_domain.multiplayer.multiplayer_game_service import MultiplayerGameService
@@ -19,7 +19,7 @@ CORS(app)
 register_error_handlers(app)
 app_with_sockets = SocketIO(app, cors_allowed_origins="*")
 
-event_dispatcher = WebSocketsEventDispatcher(app)
+event_dispatcher = WebSocketsGameEventDispatcher(app)
 
 game_service = GameService()
 image_service = ImageService()
@@ -107,6 +107,7 @@ def new_connection():
             "game_id": request.args["game_id"]
         }
     )
+    join_room(request.args["game_id"])
 
 
 @app_with_sockets.on("disconnect")

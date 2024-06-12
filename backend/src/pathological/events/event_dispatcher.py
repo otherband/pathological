@@ -1,9 +1,9 @@
 from abc import ABCMeta, abstractmethod
 
-from openapi_client.api_response import BaseModel
+from pathological.open_api.event_models import MultiplayerGameEvent
 
 
-class EventDispatcher(metaclass=ABCMeta):
+class GameEventDispatcher(metaclass=ABCMeta):
     @abstractmethod
-    def dispatch(self, event: BaseModel) -> None:
+    def dispatch(self, event: MultiplayerGameEvent) -> None:
         pass

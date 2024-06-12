@@ -24,6 +24,15 @@ components:
   schemas:
     MultiplayerGameEvent:
       type: object
+      discriminator:
+        propertyName: event_type
+      required:
+        - game_id
+      properties:
+        game_id:
+          type: string
+        event_type:
+          type: string
     PlayerData:
       type: object
       properties:
@@ -44,8 +53,6 @@ components:
         - $ref: '#/components/schemas/MultiplayerGameEvent'
         - type: object
           properties:
-            game_id:
-              type: string
             connected_players:
               type: array
               items:
@@ -59,8 +66,6 @@ components:
         - $ref: '#/components/schemas/MultiplayerGameEvent'
         - type: object
           properties:
-            game_id:
-              type: string
             connected_players:
               type: array
               items:
@@ -72,8 +77,6 @@ components:
         - $ref: '#/components/schemas/MultiplayerGameEvent'
         - type: object
           properties:
-            game_id:
-              type: string
             players_ranked:
               type: array
               items:
@@ -87,8 +90,6 @@ components:
           properties:
             player_id:
               type: string
-            game_id:
-              type: string
             challenge_id:
               type: string
     SubmitAnswer:
@@ -97,8 +98,6 @@ components:
         - type: object
           properties:
             player_id:
-              type: string
-            game_id:
               type: string
             challenge_id:
               type: string
@@ -111,8 +110,6 @@ components:
           properties:
             player_id:
               type: string
-            game_id:
-              type: string
             connected_players:
               type: array
               items:
@@ -124,8 +121,6 @@ components:
           properties:
             player_id:
               type: string
-            game_id:
-              type: string
             connected_players:
               type: array
               items:
@@ -135,8 +130,6 @@ components:
         - $ref: '#/components/schemas/MultiplayerGameEvent'
         - type: object
           properties:
-            game_id:
-              type: string
             connected_players:
               type: array
               items:

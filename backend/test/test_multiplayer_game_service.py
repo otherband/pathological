@@ -1,29 +1,28 @@
 import unittest
 from typing import List, Dict, Callable
 
-from openapi_client.api_response import BaseModel
-
-from pathological.events.event_dispatcher import EventDispatcher
+from pathological.events.event_dispatcher import GameEventDispatcher
 from pathological.events.task_scheduler import TaskScheduler
 from pathological.exceptions.user_input_exception import UserInputException
 from pathological.game_domain.multiplayer.multiplayer_game_service import MultiplayerGameService
+from pathological.open_api.event_models import MultiplayerGameEvent
 
 CORRECT_ANSWER = "death"
 
 NO_DELAY = -1
 
 
-class DummyEventDispatcher(EventDispatcher):
+class DummyGameEventDispatcher(GameEventDispatcher):
 
     def __init__(self):
         self.dispatched_events: List[Dict[str, Dict]] = []
         self.latest_delay: int = NO_DELAY
 
-    def dispatch(self, event: BaseModel) -> None:
+    def dispatch(self, event: MultiplayerGameEvent) -> None:
         self.latest_delay = NO_DELAY
         self.dispatched_events.append({
             "event_name": type(event).__name__,
-            "event_data": event.dict(),
+            "event_data": event.model_dump(),
         })
 
 
@@ -54,7 +53,7 @@ class DummyTaskScheduler(TaskScheduler):
 
 class MultiplayerGameServiceTest(unittest.TestCase):
     def setUp(self):
-        self.event_dispatcher = DummyEventDispatcher()
+        self.event_dispatcher = DummyGameEventDispatcher()
         self.task_scheduler = DummyTaskScheduler()
         self.game_service = TestableMultiplayerGameService(event_dispatcher=self.event_dispatcher,
                                                            task_scheduler=self.task_scheduler
@@ -82,6 +81,7 @@ class MultiplayerGameServiceTest(unittest.TestCase):
         self.assertEqual({
             "player_id": "player_2",
             "game_id": "game_2",
+            "event_type": None,
             "connected_players": [{
                 "player_id": "player_1",
                 "current_score": 0,
@@ -110,6 +110,7 @@ class MultiplayerGameServiceTest(unittest.TestCase):
         self.assertEqual({
             "game_id": "game13",
             "player_id": "player2",
+            "event_type": None,
             "connected_players": [{"player_id": "player1",
                                    "current_score": 0,
                                    "current_image_id": "",
@@ -129,6 +130,7 @@ class MultiplayerGameServiceTest(unittest.TestCase):
         self.assertEqual("GameStarting", second_to_last["event_name"])
         self.assertEqual({
             "game_id": "game42",
+            "event_type": None,
             "connected_players": [{
                 "player_id": "player1",
                 "current_score": 0,
@@ -145,6 +147,7 @@ class MultiplayerGameServiceTest(unittest.TestCase):
         self.assertEqual("GameStarted", last_event["event_name"])
         self.assertEqual({
             "game_id": "game42",
+            "event_type": None,
             "connected_players": [{
                 "player_id": "player1",
                 "current_score": 0,

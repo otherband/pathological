@@ -1,7 +1,7 @@
 from typing import List
 
 from pathological.app_config.game_parameters import GAME_PARAMETERS
-from pathological.events.event_dispatcher import EventDispatcher
+from pathological.events.event_dispatcher import GameEventDispatcher
 from pathological.events.task_scheduler import TaskScheduler
 from pathological.exceptions.user_input_exception import UserInputException
 from pathological.game_domain.challenge_repository import ChallengeRepository, DummyChallengeRepository
@@ -15,7 +15,7 @@ class MultiplayerGameService:
     """Event-based multiplayer game service"""
 
     def __init__(self,
-                 event_dispatcher: EventDispatcher,
+                 event_dispatcher: GameEventDispatcher,
                  task_scheduler: TaskScheduler,
                  challenge_repository: ChallengeRepository = DummyChallengeRepository(),
                  multiplayer_game_repository: MultiplayerGameRepository = EmbeddedMultiplayerGameRepository(),
@@ -108,8 +108,7 @@ class MultiplayerGameService:
         self._publish_updated_event(game, game_id)
 
     def _publish_updated_event(self, game, game_id):
-        event = UpdatePlayersData()
-        event.game_id = game_id
+        event = UpdatePlayersData(game_id=game_id)
         event.connected_players = self._to_player_data_objects(game)
         self._event_dispatcher.dispatch(event)
 
@@ -131,8 +130,7 @@ class MultiplayerGameService:
         )
 
     def _publish_started_event(self, game, game_id):
-        event = GameStarted()
-        event.game_id = game_id
+        event = GameStarted(game_id=game_id)
         event.connected_players = self._to_player_data_objects(game)
         event.message = "Game started!"
         self._event_dispatcher.dispatch(event)
@@ -181,8 +179,7 @@ class MultiplayerGameService:
         )
 
     def _publish_ended_event(self, game, game_id):
-        event = GameEnded()
-        event.game_id = game_id
+        event = GameEnded(game_id=game_id)
         event.message = "Game ended!"
         event.players_ranked = self._rank_players(game)
         self._event_dispatcher.dispatch(event)
@@ -203,21 +200,19 @@ class MultiplayerGameService:
         return players
 
     def _publish_left_event(self, game: MultiplayerGame, game_id: str, player_id: str):
-        event = PlayerLeft()
+        event = PlayerLeft(game_id=game_id)
         event.player_id = player_id
-        event.game_id = game_id
         event.connected_players = self._to_player_data_objects(game)
         self._event_dispatcher.dispatch(event)
 
     def _publish_join_event(self, game: MultiplayerGame, game_id: str, player_id: str):
-        event = PlayerJoin()
+        event = PlayerJoin(game_id=game_id)
         event.player_id = player_id
-        event.game_id = game_id
         event.connected_players = self._to_player_data_objects(game)
         self._event_dispatcher.dispatch(event)
 
     def _publish_starting_event(self, delay, game, game_id):
-        starting_event = GameStarting()
+        starting_event = GameStarting(game_id=game_id)
         starting_event.game_id = game_id
         starting_event.connected_players = self._to_player_data_objects(game)
         starting_event.start_game_delay = delay

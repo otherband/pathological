@@ -12,6 +12,11 @@ class OpenApiModelsTest(unittest.TestCase):
             started.non_existent = ""
         self.assertTrue("Object has no attribute 'non_existent'" in str(ctx.exception))
 
+    def test_must_be_initialized_with_game_id(self):
+        with self.assertRaises(Exception) as ctx:
+            GameStarted()
+        self.assertTrue("Field required" in str(ctx.exception))
+
     def test_must_respect_type(self):
         requested = ChallengeRequested(game_id="123")
         with self.assertRaises(Exception) as ctx:

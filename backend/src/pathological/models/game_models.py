@@ -48,8 +48,5 @@ class MultiplayerGame:
     connected_players: List[MultiplayerPlayerData]
     running: bool
 
-    def get_connected_ids(self):
+    def get_connected_ids(self) -> List[str]:
         return [p.player_id for p in self.connected_players]
-
-    def get_truncated_player_objects(self):
-        return [{"player_id": p.player_id} for p in self.connected_players]

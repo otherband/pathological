@@ -7,7 +7,8 @@ from pathological.models.game_models import Challenge, PlayerSession
 
 
 class GameService:
-    def __init__(self, player_repository: PlayerSessionRepository = EmbeddedPlayerSessionRepository(),
+    def __init__(self,
+                 player_repository: PlayerSessionRepository = EmbeddedPlayerSessionRepository(),
                  challenge_repository: ChallengeRepository = DummyChallengeRepository()):
         self.player_repository = player_repository
         self.challenge_repository = challenge_repository
@@ -40,12 +41,12 @@ class GameService:
         return {"player_id": player_id,
                 "player_score": len(self.player_repository.get_player(player_id).challenges_solved)}
 
-    def _remove_answer(self, challenge: Challenge):
+    def _remove_answer(self, challenge: Challenge) -> Challenge:
         response_challenge = Challenge(challenge_id=challenge.challenge_id,
                                        correct_answer="",
                                        possible_answers=challenge.possible_answers,
                                        image_id=challenge.image_id)
         return response_challenge
 
-    def _get_answer(self, challenge_key):
+    def _get_answer(self, challenge_key: str) -> str:
         return self.challenge_repository.get_challenge_by_id(challenge_key).correct_answer

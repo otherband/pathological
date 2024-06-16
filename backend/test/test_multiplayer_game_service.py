@@ -27,9 +27,6 @@ class DummyGameEventDispatcher(GameEventDispatcher):
 
 
 class TestableMultiplayerGameService(MultiplayerGameService):
-    start_game_delay = 0
-    delete_game_delay = 0
-    end_game_delay = 5
 
     def _get_delay(self):
         return 0

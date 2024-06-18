@@ -224,7 +224,6 @@ class MultiplayerGameService:
                                 game_id: str,
                                 delay: int):
         starting_event = GameStarting(game_id=game_id)
-        starting_event.game_id = game_id
         starting_event.connected_players = self._to_player_data_objects(game)
         starting_event.start_game_delay = delay
         starting_event.message = f"Game starting in {delay} seconds..."

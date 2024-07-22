@@ -1,4 +1,6 @@
 import { GameController } from "./controller";
+import { createMultiplayerGame, joinMultiplayerGame } from "./multiplayer_logic";
+import { sendJoinGameEvent } from "./socket_controller";
 const gameController: GameController = new GameController();
 let playerId: string;
 const urlCreator = window.URL || window.webkitURL;
@@ -6,10 +8,6 @@ const urlCreator = window.URL || window.webkitURL;
 async function startGame() {
   playerId = (await gameController.getPlayerId())['player_id'];
   console.log(`Received playerId ${playerId}`)
-  document
-    .getElementById("start-game-div")
-    .setAttribute("style", "display: none");
-  console.log("hidden");
   startNextChallenge();
   countDown();
 }
@@ -109,4 +107,9 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export { startGame };
+function showStartMultiplayerDiv() {
+  document.getElementById("start-multiplayer-game-div").setAttribute("style", "display: block")
+}
+
+export { startGame, createMultiplayerGame,
+  joinMultiplayerGame, showStartMultiplayerDiv };

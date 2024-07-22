@@ -1,0 +1,15 @@
+{
+  "name": "open-api",
+  "version": "1.0.0",
+  "description": "Module to generate objects",
+  "author": "Yazan",
+  "license": "ISC",
+  "scripts": {
+    "generate-python": "openapi-generator-cli generate -i ./api-spec.yml -g python -o generated/pathological-python-api --additional-properties=modelPropertyNaming=original",
+    "generate-typescript": "openapi-generator-cli generate -i ./api-spec.yml -g typescript -o generated/pathological-typescript-api --additional-properties=modelPropertyNaming=original",
+    "pls-help": "openapi-generator-cli help"
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.13.4"
+  }
+}

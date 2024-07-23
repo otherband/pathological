@@ -70,7 +70,7 @@ class MultiplayerGameService:
 
         delay = self._get_delay()
 
-        self._publish_starting_event(delay, game, game_id)
+        self._publish_starting_event(game, game_id, delay)
 
         self._task_scheduler.run_after(
             seconds_delay=delay,
@@ -107,7 +107,7 @@ class MultiplayerGameService:
 
         self._publish_updated_event(game, game_id)
 
-    def _publish_updated_event(self, game, game_id):
+    def _publish_updated_event(self, game: MultiplayerGame, game_id: str):
         event = UpdatePlayersData(game_id=game_id)
         event.connected_players = self._to_player_data_objects(game)
         self._event_dispatcher.dispatch(event)
@@ -129,7 +129,7 @@ class MultiplayerGameService:
             f=lambda: self._end_game(game_id)
         )
 
-    def _publish_started_event(self, game, game_id):
+    def _publish_started_event(self, game: MultiplayerGame, game_id: str):
         event = GameStarted(game_id=game_id)
         event.connected_players = self._to_player_data_objects(game)
         event.message = "Game started!"
@@ -157,7 +157,7 @@ class MultiplayerGameService:
         if player_id not in game.get_connected_ids():
             raise UserInputException(f"Name '{player_id}' is not in the game '{game_id}'.")
 
-    def _verify_exists(self, game_id):
+    def _verify_exists(self, game_id: str):
         if not self._game_repository.exists(game_id):
             raise UserInputException(f"Game with ID {game_id} does not exist.")
 
@@ -178,7 +178,9 @@ class MultiplayerGameService:
             f=delete_game
         )
 
-    def _publish_ended_event(self, game, game_id):
+    def _publish_ended_event(self,
+                             game: MultiplayerGame,
+                             game_id: str):
         event = GameEnded(game_id=game_id)
         event.message = "Game ended!"
         event.players_ranked = self._rank_players(game)
@@ -199,21 +201,29 @@ class MultiplayerGameService:
         players.sort(key=lambda p: p.current_score, reverse=True)
         return players
 
-    def _publish_left_event(self, game: MultiplayerGame, game_id: str, player_id: str):
+    def _publish_left_event(self,
+                            game: MultiplayerGame,
+                            game_id: str,
+                            player_id: str):
         event = PlayerLeft(game_id=game_id)
         event.player_id = player_id
         event.connected_players = self._to_player_data_objects(game)
         self._event_dispatcher.dispatch(event)
 
-    def _publish_join_event(self, game: MultiplayerGame, game_id: str, player_id: str):
+    def _publish_join_event(self,
+                            game: MultiplayerGame,
+                            game_id: str,
+                            player_id: str):
         event = PlayerJoin(game_id=game_id)
         event.player_id = player_id
         event.connected_players = self._to_player_data_objects(game)
         self._event_dispatcher.dispatch(event)
 
-    def _publish_starting_event(self, delay, game, game_id):
+    def _publish_starting_event(self,
+                                game: MultiplayerGame,
+                                game_id: str,
+                                delay: int):
         starting_event = GameStarting(game_id=game_id)
-        starting_event.game_id = game_id
         starting_event.connected_players = self._to_player_data_objects(game)
         starting_event.start_game_delay = delay
         starting_event.message = f"Game starting in {delay} seconds..."

@@ -31,7 +31,7 @@ class PandasChallengeRepository(ChallengeRepository):
     def _to_challenge(self, challenge_series: pd.Series):
         return Challenge(challenge_id=str(challenge_series.name),
                          correct_answer=challenge_series['correct_answer'],
-                         image_path=challenge_series['image_path'],
+                         image_id=challenge_series['image_path'],
                          possible_answers=set(challenge_series['possible_answers'].split(";")))
 
     def _validate_dataframe(self):

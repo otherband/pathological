@@ -34,7 +34,7 @@ class AppTest(unittest.TestCase):
                                                     "answer": "ANY"})
         self.assertOkay(solution_response)
 
-        image_response = self.app.get(f"/api/v1/image/{challenge_response.json['challenge_id']}")
+        image_response = self.app.get(f"/api/v1/image/path2.png")
         self.assertOkay(image_response)
         self.assertEqual(image_response.content_type, "image/png")
 

@@ -25,5 +25,5 @@ class PandasRepoTest(unittest.TestCase):
         challenge = self.repo.get_random_challenge()
         by_id = self.repo.get_challenge_by_id(challenge.challenge_id)
         self.assertEqual(challenge.possible_answers, by_id.possible_answers)
-        self.assertEqual(challenge.image_path, by_id.image_path)
+        self.assertEqual(challenge.image_id, by_id.image_id)
         self.assertEqual(challenge.correct_answer, by_id.correct_answer)

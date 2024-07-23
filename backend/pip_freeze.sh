@@ -1,0 +1,1 @@
+pip freeze > requirements.txt --exclude openapi-client

@@ -8,24 +8,15 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 
-<body>
-  <div class="text-center p-2">
-    <h1 class="display-4 font-monospace">Pathological!</h1>
-    <h4>
-      Pathological is a game where doctors compete over image classification
-      tasks. <br />
-      The winner gets replaced by AI last.
-    </h4>
-  </div>
+<body onload="startGame()">
 
+  <div class="text-center" id="current-challenge-div" style="display: none"></div>
+  <div id="player-score-div"></div>
 
-  <div class="text-center m-3" id="start-game-div">
-    <a type="button" class="btn btn-danger w-25" href="/single_player.html">
-      Start Game!
-    </a>
-    <a type="button" class="btn btn-danger w-25" href="./multi_player.html">
-      Start multiplayer game!
-    </a>
+  <div class="text-center" style="display: flex; justify-content: center">
+    <div id="game-timer-div" class="text-center border w-25 p-3 display-4">
+      Remaining time: <span id="game-timer-seconds"> 10 </span>s
+    </div>
   </div>
 
   <script src="main.js"></script>

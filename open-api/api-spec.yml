@@ -1,0 +1,136 @@
+openapi: 3.0.0
+info:
+  title: Multiplayer Game Events API
+  version: 1.0.0
+paths:
+  /multiplayer-game-events:
+    post:
+      summary: Send a multiplayer game event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/GameStarting'
+                - $ref: '#/components/schemas/GameStarted'
+                - $ref: '#/components/schemas/ChallengeRequested'
+                - $ref: '#/components/schemas/PlayerJoin'
+                - $ref: '#/components/schemas/PlayerLeft'
+      responses:
+        '200':
+          description: Event received successfully
+components:
+  schemas:
+    MultiplayerGameEvent:
+      type: object
+      discriminator:
+        propertyName: event_type
+      required:
+        - game_id
+      properties:
+        game_id:
+          type: string
+        event_type:
+          type: string
+    PlayerData:
+      type: object
+      properties:
+        player_id:
+          type: string
+        current_challenge_id:
+          type: string
+        current_image_id:
+          type: string
+        current_challenge_options:
+          type: array
+          items:
+            type: string
+        current_score:
+          type: integer
+    GameStarting:
+      allOf:
+        - $ref: '#/components/schemas/MultiplayerGameEvent'
+        - type: object
+          properties:
+            connected_players:
+              type: array
+              items:
+                $ref: '#/components/schemas/PlayerData'
+            start_game_delay:
+              type: integer
+            message:
+              type: string
+    GameStarted:
+      allOf:
+        - $ref: '#/components/schemas/MultiplayerGameEvent'
+        - type: object
+          properties:
+            connected_players:
+              type: array
+              items:
+                $ref: '#/components/schemas/PlayerData'
+            message:
+              type: string
+    GameEnded:
+      allOf:
+        - $ref: '#/components/schemas/MultiplayerGameEvent'
+        - type: object
+          properties:
+            players_ranked:
+              type: array
+              items:
+                $ref: '#/components/schemas/PlayerData'
+            message:
+              type: string
+    ChallengeRequested:
+      allOf:
+        - $ref: '#/components/schemas/MultiplayerGameEvent'
+        - type: object
+          properties:
+            player_id:
+              type: string
+            challenge_id:
+              type: string
+    SubmitAnswer:
+      allOf:
+        - $ref: '#/components/schemas/MultiplayerGameEvent'
+        - type: object
+          properties:
+            player_id:
+              type: string
+            challenge_id:
+              type: string
+            answer:
+              type: string
+    PlayerJoin:
+      allOf:
+        - $ref: '#/components/schemas/MultiplayerGameEvent'
+        - type: object
+          properties:
+            player_id:
+              type: string
+            connected_players:
+              type: array
+              items:
+                $ref: '#/components/schemas/PlayerData'
+    PlayerLeft:
+      allOf:
+        - $ref: '#/components/schemas/MultiplayerGameEvent'
+        - type: object
+          properties:
+            player_id:
+              type: string
+            connected_players:
+              type: array
+              items:
+                $ref: '#/components/schemas/PlayerData'
+    UpdatePlayersData:
+      allOf:
+        - $ref: '#/components/schemas/MultiplayerGameEvent'
+        - type: object
+          properties:
+            connected_players:
+              type: array
+              items:
+                $ref: '#/components/schemas/PlayerData'

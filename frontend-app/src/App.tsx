@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import "./App.css";
 import { ActivePage } from "./ActivePage";
 import { MultiplayerPage } from "./components/MultiplayerPage";
 import { SinglePlayerPage } from "./components/SinglePlayerPage";

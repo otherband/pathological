@@ -169,14 +169,7 @@ class MultiplayerGameService:
         self._game_repository.update_game(game)
 
         self._publish_ended_event(game, game_id)
-
-        def delete_game():
-            self._game_repository.delete_game(game_id)
-
-        self._task_scheduler.run_after(
-            seconds_delay=self._get_delete_game_delay(),
-            f=delete_game
-        )
+        self._game_repository.delete_game(game_id)
 
     def _publish_ended_event(self,
                              game: MultiplayerGame,

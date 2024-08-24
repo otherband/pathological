@@ -18,6 +18,7 @@
 
 .start-game-btn:hover {
   color: chocolate;
+  opacity: 0.75;
 }
 
 .start-game-battle {

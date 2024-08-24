@@ -12,8 +12,12 @@
 .start-game-btn {
   width: auto;
   height: 35vh;
-  color: black;
-  font-size: 22px;
+  color: coral;
+  font-size: 21.5px;
+}
+
+.start-game-btn:hover {
+  color: chocolate;
 }
 
 .start-game-battle {
@@ -36,9 +40,13 @@
 
 #multi-page-background-img-div {
   background-image: url("./assets/battle.png");
-  opacity: 0.1;
+  opacity: 0.075;
   position: absolute;
   width: 100vw;
   height: 100vh;
   z-index: -1;
+}
+
+#game-result-div {
+    font-size: 30px;
 }

@@ -114,13 +114,13 @@ def new_connection():
 def remove_from_game():
     # noinspection PyUnresolvedReferences
     connection_id = get_session_id()
-    print(f"Connection terminated {connection_id}")
     player_data = connection_repository.remove_connection(connection_id)
     # TODO: fix this. Should use the session ID to remove the player -
     #  because what happens now is, if someone tries to join a game
     #  with an existing name, the existing player is kicked out (LMAO)
     multiplayer_game_service.leave_game(game_id=player_data["game_id"],
                                         player_id=player_data["player_id"])
+    print(f"Connection terminated {connection_id}")
 
 
 @app.route("/actuator/health")

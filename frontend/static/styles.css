@@ -1,11 +1,53 @@
-
-.long-div { 
-    height: 30%;
+.long-div {
+  height: 30%;
 }
 
 .challenge-img {
-    text-align: center;
-    width: 20%;
-    height: auto;
-    margin: 1%;
+  text-align: center;
+  width: 20%;
+  height: auto;
+  margin: 1%;
+}
+
+.start-game-btn {
+  width: auto;
+  height: 35vh;
+  color: coral;
+  font-size: 21.5px;
+}
+
+.start-game-btn:hover {
+  color: chocolate;
+  opacity: 0.75;
+}
+
+.start-game-battle {
+  background-position: 50% 0;
+  background-image: url("./assets/battle.png");
+}
+.start-game-solo {
+  background-position: 75% 0;
+  background-image: url("./assets/solo.png");
+}
+
+#solo-page-background-img-div {
+  background-image: url("./assets/solo.png");
+  opacity: 0.1;
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+}
+
+#multi-page-background-img-div {
+  background-image: url("./assets/battle.png");
+  opacity: 0.075;
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+}
+
+#game-result-div {
+    font-size: 30px;
 }

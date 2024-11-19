@@ -1,4 +1,5 @@
 import { hostApi } from "./Config";
+import { Challenge } from "./SinglePlayerTypes";
 const BASE_URL = hostApi.concat("/api/v1");
 
 class GameController {
@@ -18,7 +19,7 @@ class GameController {
     ).blob();
   }
 
-  async getChallenge(playerId: string): Promise<object> {
+  async getChallenge(playerId: string): Promise<Challenge> {
     return await (
       await fetch(BASE_URL.concat("/request-challenge"), {
         method: "POST",

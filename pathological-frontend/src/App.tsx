@@ -41,10 +41,8 @@ function SelectGameModeButton(props: {
   className: string;
 }) {
   return (
-    <a
-      type="button"
+    <div
       className={"start-game-btn btn btn-danger w-25 " + props.className}
-      href="."
       onClick={(event) => {
         event.stopPropagation();
         props.setGameMode();
@@ -57,7 +55,7 @@ function SelectGameModeButton(props: {
       >
         <strong>{props.buttonText}</strong>
       </div>
-    </a>
+    </div>
   );
 }
 

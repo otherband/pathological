@@ -20,7 +20,7 @@ function ChallengeDiv(props: {
     <>
       <div id="current-challenge-div" style={{ display: "block" }}>
         <div>
-          <img alt="Challenge" src={imageUrl} />
+          <img className="challenge-img" alt="Challenge" src={imageUrl} />
         </div>
         {props.challenge.possible_answers.map((answer) => {
           return (
@@ -89,13 +89,14 @@ export function SinglePlayerPage() {
   }, []);
 
   useEffect(() => {
-    if (remainingSeconds === 0) {
-      gameController.getScore(playerId.current).then((playerScore) => {
-        setPlayerScore(playerScore.player_score);
-      });
-      return;
-    }
     if (isReady()) {
+      if (remainingSeconds === 0) {
+        gameController.getScore(playerId.current).then((playerScore) => {
+          setPlayerScore(playerScore.player_score);
+        });
+        return;
+      }
+
       setTimeout(() => {
         setRemainingSeconds((remaining) => remaining - 1);
       }, 1000);

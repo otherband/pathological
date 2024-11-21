@@ -17,9 +17,7 @@ function TopHalfBackground() {
 }
 
 function BottomHalfBackground() {
-  return (
-    <div id="multi-page-background-img-div" style={{ height: "50vh" }}></div>
-  );
+  return <div id="multi-page-background-img-div" style={{ height: "50vh" }}></div>;
 }
 
 function Intro() {
@@ -27,19 +25,14 @@ function Intro() {
     <div className="text-center p-3">
       <h1 className="display-4 font-monospace">Pathological!</h1>
       <h4>
-        Pathological is a game where doctors compete over image classification
-        tasks. <br />
+        Pathological is a game where doctors compete over image classification tasks. <br />
         The winner gets replaced by AI last.
       </h4>
     </div>
   );
 }
 
-function SelectGameModeButton(props: {
-  setGameMode: () => void;
-  buttonText: string;
-  className: string;
-}) {
+function SelectGameModeButton(props: { setGameMode: () => void; buttonText: string; className: string }) {
   return (
     <div
       className={"start-game-btn btn btn-danger w-25 " + props.className}
@@ -95,9 +88,7 @@ function App() {
   const [gameMode, setGameMode] = useState(GameMode.LANDING);
   return (
     <div className="App">
-      {GameMode.LANDING === gameMode && (
-        <LandingContent setGameMode={setGameMode} />
-      )}
+      {GameMode.LANDING === gameMode && <LandingContent setGameMode={setGameMode} />}
       {GameMode.SINGLE_PLAYER === gameMode && <SinglePlayerPage />}
       {GameMode.MULTIPLAYER === gameMode && <MultiplayerPage />}
     </div>

@@ -10,7 +10,11 @@ interface ChallengeWithParsedImage extends Challenge {
   parsedImageBlob: Blob;
 }
 
-function ChallengeDiv(props: { challenge: ChallengeWithParsedImage }) {
+function ChallengeDiv(props: {
+  playerId: string;
+  challenge: ChallengeWithParsedImage;
+  setCurrentChallenge: (challenge: ChallengeWithParsedImage) => void;
+}) {
   const imageUrl = urlCreator.createObjectURL(props.challenge.parsedImageBlob);
   return (
     <>
@@ -21,7 +25,24 @@ function ChallengeDiv(props: { challenge: ChallengeWithParsedImage }) {
         {props.challenge.possible_answers.map((answer) => {
           return (
             <div>
-              <button className="btn btn-danger w-25 m-2">{answer}</button>
+              <button
+                onClick={() => {
+                  gameController.submitAnswer(props.playerId, props.challenge.challenge_id, answer);
+                  gameController.getChallenge(props.playerId).then((response) => {
+                    gameController.getChallengeImage(response.image_id).then((imageBlob) => {
+                      props.setCurrentChallenge({
+                        challenge_id: response.challenge_id,
+                        image_id: response.image_id,
+                        possible_answers: response.possible_answers,
+                        parsedImageBlob: imageBlob,
+                      });
+                    });
+                  });
+                }}
+                className="btn btn-danger w-25 m-2"
+              >
+                {answer}
+              </button>
             </div>
           );
         })}
@@ -33,24 +54,17 @@ function ChallengeDiv(props: { challenge: ChallengeWithParsedImage }) {
 export function SinglePlayerPage() {
   var playerId = useRef("");
 
-  const [currentChallenge, setCurrentChallenge] = useState<
-    ChallengeWithParsedImage | undefined
-  >();
+  const [currentChallenge, setCurrentChallenge] = useState<ChallengeWithParsedImage | undefined>();
 
-  const [remainingSeconds, setRemainingSeconds] = useState(
-    INITIAL_REMAINING_SECONDS
-  );
+  const [remainingSeconds, setRemainingSeconds] = useState(INITIAL_REMAINING_SECONDS);
+
+  const [playerScore, setPlayerScore] = useState<number | undefined>();
 
   const gameDone = remainingSeconds === 0;
 
   function isReady() {
     return playerId.current !== "";
   }
-
-  // gameController.getChallengeImage(challenge["image_id"]).then((blob) => {
-  //   imageElement.src = urlCreator.createObjectURL(blob);
-  //   imageElement.classList.add("challenge-img");
-  // });
 
   useEffect(() => {
     gameController.getPlayerId().then((response) => {
@@ -61,21 +75,26 @@ export function SinglePlayerPage() {
         }, 1000);
 
         gameController.getChallenge(response.player_id).then((response) => {
-          gameController
-            .getChallengeImage(response.image_id)
-            .then((imageBlob) => {
-              setCurrentChallenge({
-                image_id: response.image_id,
-                possible_answers: response.possible_answers,
-                parsedImageBlob: imageBlob,
-              });
+          gameController.getChallengeImage(response.image_id).then((imageBlob) => {
+            setCurrentChallenge({
+              challenge_id: response.challenge_id,
+              image_id: response.image_id,
+              possible_answers: response.possible_answers,
+              parsedImageBlob: imageBlob,
             });
+          });
         });
       }
     });
   }, []);
 
   useEffect(() => {
+    if (remainingSeconds === 0) {
+      gameController.getScore(playerId.current).then((playerScore) => {
+        setPlayerScore(playerScore.player_score);
+      });
+      return;
+    }
     if (isReady()) {
       setTimeout(() => {
         setRemainingSeconds((remaining) => remaining - 1);
@@ -89,9 +108,16 @@ export function SinglePlayerPage() {
         <h3>Pathological Single-Player</h3>
       </div>
       <div className="p-3 m-3">
-        <div className="text-center" id="current-challenge-div"></div>
-        <div id="player-score-div"></div>
-
+        <div className="text-center" id="current-challenge-div">
+          {!gameDone && currentChallenge !== undefined && (
+            <ChallengeDiv
+              playerId={playerId.current}
+              setCurrentChallenge={setCurrentChallenge}
+              challenge={currentChallenge}
+            />
+          )}
+        </div>
+        {gameDone && <div id="player-score-div"> {`Player score: ${playerScore}`} </div>}
         <div
           className="text-center"
           style={{
@@ -99,13 +125,7 @@ export function SinglePlayerPage() {
             justifyContent: "center",
           }}
         >
-          {currentChallenge !== undefined && (
-            <ChallengeDiv challenge={currentChallenge} />
-          )}
-          <div
-            id="game-timer-div"
-            className="text-center border w-25 p-3 display-4"
-          >
+          <div id="game-timer-div" className="text-center border w-25 p-3 display-4">
             Remaining time:
             <span id="game-timer-seconds"> {remainingSeconds} </span>s
           </div>

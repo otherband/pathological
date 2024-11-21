@@ -3,7 +3,7 @@ import { Challenge } from "./SinglePlayerTypes";
 const BASE_URL = hostApi.concat("/api/v1");
 
 class GameController {
-  async getPlayerId(): Promise<{"player_id": string}> {
+  async getPlayerId(): Promise<{ player_id: string }> {
     return await (
       await fetch(BASE_URL.concat("/new-session-id"), {
         method: "POST",
@@ -33,11 +33,7 @@ class GameController {
     ).json();
   }
 
-  async submitAnswer(
-    playerId: string,
-    challenge_key: string,
-    answer: string
-  ): Promise<Response> {
+  async submitAnswer(playerId: string, challenge_key: string, answer: string): Promise<Response> {
     return await fetch(BASE_URL.concat("/solve-challenge"), {
       method: "POST",
       headers: {
@@ -51,7 +47,7 @@ class GameController {
     });
   }
 
-  async getScore(playerId: string): Promise<object> {
+  async getScore(playerId: string): Promise<{ player_score: number }> {
     return await (
       await fetch(BASE_URL.concat(`/score/${playerId}`), {
         method: "GET",

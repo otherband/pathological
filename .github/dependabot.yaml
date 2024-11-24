@@ -27,3 +27,12 @@ updates:
     target-branch: master
     labels:
       - dependabot
+  - package-ecosystem: "npm"
+    directory: "/open-api"
+    schedule:
+      interval: "daily"
+      time: "11:30"
+      timezone: "Etc/Universal"
+    target-branch: master
+    labels:
+      - dependabot

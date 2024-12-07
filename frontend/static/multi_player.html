@@ -1,123 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <title>Pathological 🔬</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
 
-<head>
-  <title>Pathological 🥸</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
-  <link rel="stylesheet" href="styles.css" />
-</head>
+  <body>
+    <div id="multi-page-background-img-div"></div>
 
-<body>
-  <div id="header-div" class="text-center p-3">
-    <h3>Pathological Multiplayer</h3>
-  </div>
-
-  <div id="start-multiplayer-game-div" class="text-center p-5 w-50 container">
-    <form id="start-multiplayer-game-form" class="form-control p-3 m-3">
-      <div class="w-50 container">
-        <input name="player-name" class="form-control m-1" id="multiplayer-player-name-input" type="text" required>
-        <label class="form-label" for="multiplayer-player-name-input">Player name</label>
-      </div>
-      <div class="w-50 container">
-        <input name="lobby-id" class="form-control m-1" id="multiplayer-game-name-input" type="text" required>
-        <label class="form-label" for="multiplayer-game-name-input">Lobby ID</label>
-      </div>
-
-      <br>
-      <button class="btn btn-danger m-2" type="button" onclick="createMultiplayerGame()">
-        Start multiplayer game
-      </button>
-      <button class="btn btn-danger m-2" type="button" onclick="joinMultiplayerGame()">
-        Join multiplayer game
-      </button>
-    </form>
-
-    <div id="multiplayer-game-init-error-response-div">
-
+    <div id="header-div" class="text-center p-3">
+      <h3>Pathological Multiplayer</h3>
     </div>
 
-  </div>
+    <div id="start-multiplayer-game-div" class="text-center p-5 w-50 container">
+      <form id="start-multiplayer-game-form" class="form-control p-3 m-3">
+        <div class="w-50 container">
+          <input
+            name="player-name"
+            class="form-control m-1"
+            id="multiplayer-player-name-input"
+            type="text"
+            required
+          />
+          <label class="form-label" for="multiplayer-player-name-input"
+            >Player name</label
+          >
+        </div>
+        <div class="w-50 container">
+          <input
+            name="lobby-id"
+            class="form-control m-1"
+            id="multiplayer-game-name-input"
+            type="text"
+            required
+          />
+          <label class="form-label" for="multiplayer-game-name-input"
+            >Lobby ID</label
+          >
+        </div>
 
-  <div class="container w-50 justify-content-center" id="multiplayer-lobby-div" style="display: none;">
+        <br />
+        <button
+          class="btn btn-danger m-2"
+          type="button"
+          onclick="createMultiplayerGame()"
+        >
+          Start multiplayer game
+        </button>
+        <button
+          class="btn btn-danger m-2"
+          type="button"
+          onclick="joinMultiplayerGame()"
+        >
+          Join multiplayer game
+        </button>
+      </form>
 
-    <div class="border p-5">
-      <div class="text-lg-center">
-        <h3 id="lobby-game-id-header"></h3>
-      </div>
-      <h4>Connected players</h4>
-      <ul id="connected-players-list">
-      </ul>
-      <div id="lobby-info-div" class="border p-4 m-3">
-      </div>
-      <button id="start-multiplayer-game-button" class="btn btn-danger m-2" type="button">
-        Start multiplayer game
-      </button>
+      <div id="multiplayer-game-init-error-response-div"></div>
     </div>
-  </div>
 
-  <div id="multiplayer-game-div" style="display: none;">
-    <div class="container">
-      <div class="row">
-        <div class="col">
-          <div id="rival-placeholder-0">
-          </div>
+    <div
+      class="container w-50 justify-content-center"
+      id="multiplayer-lobby-div"
+      style="display: none"
+    >
+      <div class="border p-5">
+        <div class="text-lg-center">
+          <h3 id="lobby-game-id-header"></h3>
         </div>
-        <div class="col"></div>
-        <div class="col">
-          <div id="rival-placeholder-1">
-          </div>
-        </div>
+        <h4>Connected players</h4>
+        <ul id="connected-players-list"></ul>
+        <div id="lobby-info-div" class="border p-4 m-3"></div>
+        <button
+          id="start-multiplayer-game-button"
+          class="btn btn-danger m-2"
+          type="button"
+        >
+          Start multiplayer game
+        </button>
       </div>
-      <div class="row">
-        <div class="col"></div>
-        <div class="col col-lg-10">
-          <div id="this-player-div" class="text-center">
-            <h4>Score: <span id="this-player-score-span">0</span> | Remaining time: <span
-                id="remaining-time-span"></span></h4>
-            <div class="text-center" id="current-challenge-div">
-              <img src="path1.jpeg" id="this-player-current-challenge-img" class="w-50">
+    </div>
+
+    <div id="multiplayer-game-div" style="display: none">
+      <div class="container">
+        <div class="row">
+          <div class="col">
+            <div id="rival-placeholder-0"></div>
+          </div>
+          <div class="col"></div>
+          <div class="col">
+            <div id="rival-placeholder-1"></div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col"></div>
+          <div class="col col-lg-10">
+            <div id="this-player-div" class="text-center">
+              <h4>
+                Score: <span id="this-player-score-span">0</span> | Remaining
+                time: <span id="remaining-time-span"></span>
+              </h4>
+              <div class="text-center" id="current-challenge-div">
+                <img
+                  src="path1.jpeg"
+                  id="this-player-current-challenge-img"
+                  class="w-50"
+                />
+              </div>
+              <div id="this-player-options">
+                <div>
+                  <button class="btn btn-danger w-25 m-2">Option A</button>
+                </div>
+                <div>
+                  <button class="btn btn-danger w-25 m-2">Option B</button>
+                </div>
+                <div>
+                  <button class="btn btn-danger w-25 m-2">Option C</button>
+                </div>
+              </div>
             </div>
-            <div id="this-player-options">
-              <div>
-                <button class="btn btn-danger w-25 m-2">Option A</button>
-              </div>
-              <div>
-                <button class="btn btn-danger w-25 m-2">Option B</button>
-              </div>
-              <div>
-                <button class="btn btn-danger w-25 m-2">Option C</button>
-              </div>
-            </div>
           </div>
+          <div class="col"></div>
         </div>
-        <div class="col"></div>
-      </div>
-      <div class="row">
-        <div class="col">
-          <div id="rival-placeholder-2">
+        <div class="row">
+          <div class="col">
+            <div id="rival-placeholder-2"></div>
           </div>
-        </div>
-        <div class="col"></div>
-        <div class="col">
-          <div id="rival-placeholder-3">
+          <div class="col"></div>
+          <div class="col">
+            <div id="rival-placeholder-3"></div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div id="game-result-div" class="text-center" style="display: none;">
+    <div id="game-result-div" class="text-center" style="display: none">
       <div class="add-results-div">
         <h6>Results</h6>
       </div>
-  </div>
+    </div>
 
-
-  <script src="main.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-    crossorigin="anonymous"></script>
-</body>
-
+    <script src="main.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+  </body>
 </html>

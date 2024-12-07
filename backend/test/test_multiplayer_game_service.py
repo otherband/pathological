@@ -157,6 +157,10 @@ class MultiplayerGameServiceTest(unittest.TestCase):
 
         self.task_scheduler.run_latest()  # run delayed end game task!
 
+    @unittest.skip
+    def test_trigger_start_game_when_game_already_started(self):
+        pass
+
     def test_full_game(self):
         self.game_service.create_game("game_full", "player_1")
         self.game_service.join_game("game_full", "player_2")

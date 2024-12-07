@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { multiplayerController } from "../multiplayer_controller";
+import { GameController } from "../Controller";
 
 const controller = new multiplayerController();
+const PLAYER_NAME_INPUT = "multiplayer-player-name-input";
+const GAME_NAME_INPUT = "multiplayer-game-name-input";
+const FORM_ID = "start-multiplayer-game-form";
+const playerNameField = "player-name";
+const lobbyIdField = "lobby-id";
 
 enum GameState {
   CREATION,
@@ -10,43 +16,63 @@ enum GameState {
   ENDED,
 }
 
-function StartGameDiv(props: {
-  setGameState: (gameState: GameState) => void 
-}) {
-  const PLAYER_NAME_INPUT = "multiplayer-player-name-input";
-  const GAME_NAME_INPUT = "multiplayer-game-name-input";
-  const FORM_ID = "start-multiplayer-game-form";
+function StartGameDiv(props: { setGameState: (gameState: GameState) => void }) {
+  const [startGameError, setStartGameError] = useState<undefined | string>();
+
+  function startGame(controllerFunction: (gameName: string, playerName: string) => Promise<Response>) {
+    const form = document.getElementById(FORM_ID) as HTMLFormElement;
+    const formValid = form.checkValidity();
+    if (!formValid) {
+      form.reportValidity();
+    } else {
+      const formData = new FormData(form);
+      const playerName = formData.get(playerNameField) as string;
+      const gameName = formData.get(lobbyIdField) as string;
+      controllerFunction(gameName, playerName).then((res) => {
+        if (res.status !== 200) {
+          res.json().then((resJson) => {
+            setStartGameError("Failed to create game: " + resJson["message"]);
+          });
+        } else {
+          props.setGameState(GameState.LOBBY);
+        }
+      });
+    }
+  }
 
   return (
     <div id="start-multiplayer-game-div" className="text-center p-5 w-50 container">
       <form id={FORM_ID} className="form-control p-3 m-3">
         <div className="w-50 container">
-          <input name="player-name" className="form-control m-1" id={PLAYER_NAME_INPUT} type="text" required />
+          <input name={playerNameField} className="form-control m-1" id={PLAYER_NAME_INPUT} type="text" required />
           <label className="form-label" htmlFor={PLAYER_NAME_INPUT}>
             Player name
           </label>
         </div>
         <div className="w-50 container">
-          <input name="lobby-id" className="form-control m-1" id={GAME_NAME_INPUT} type="text" required />
+          <input name={lobbyIdField} className="form-control m-1" id={GAME_NAME_INPUT} type="text" required />
           <label className="form-label" htmlFor={GAME_NAME_INPUT}>
             Lobby ID
           </label>
         </div>
 
         <br />
-        <button onClick={() => {
-          const form = document.getElementById(FORM_ID) as HTMLFormElement;
-          const formValid = (form).checkValidity();
-          if (!formValid) {
-            form.reportValidity();
-          } else {
-            const formData = new FormData(form);
-
-          }
-        }} className="btn btn-danger m-2" type="button">
+        <button
+          onClick={() => {
+            startGame(controller.createGame);
+          }}
+          className="btn btn-danger m-2"
+          type="button"
+        >
           Start multiplayer game
         </button>
-        <button className="btn btn-danger m-2" type="button">
+        <button
+          onClick={() => {
+            startGame(controller.joinGame);
+          }}
+          className="btn btn-danger m-2"
+          type="button"
+        >
           Join multiplayer game
         </button>
       </form>

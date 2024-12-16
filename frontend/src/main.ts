@@ -84,6 +84,7 @@ function countDown() {
     Number.parseInt(timerElement.textContent) || 15;
   if (remainingSeconds - 1 <= 0) {
     timerElement.textContent = "ZERO ";
+    document.getElementById("game-timer-div").setAttribute("style", "display: none");
     document
       .getElementById("current-challenge-div")
       .setAttribute("style", "display: none");
@@ -100,7 +101,7 @@ async function showScore() {
   const playerScoreResponse = await gameController.getScore(playerId);
   console.log("Fetched response: " + JSON.stringify(playerScoreResponse));
   const score = playerScoreResponse["player_score"] as number;
-  scoreDiv.appendChild(textDiv(`Player score: ${score}`));
+  scoreDiv.appendChild(textDiv(`Your score: ${score}`));
 }
 
 function sleep(ms: number): Promise<void> {

@@ -15,3 +15,7 @@ dependencies = [
     "eventlet (>=0.39.1,<0.40.0)"
 ]
 requires-python = ">=3.9,<4.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+

@@ -40,7 +40,7 @@ jobs:
       - name: Install poetry
         uses: abatilo/actions-poetry@v4
       - name: Prepare venv
-        run: python -m venv venv && poetry use venv/bin/python3.12;
+        run: python -m venv venv && poetry env use venv/bin/python3.12;
       - name: Install dependencies
         run: poetry install;
       - name: generate openapi models

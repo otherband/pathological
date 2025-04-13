@@ -31,17 +31,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18.x'
-      - name: generate openapi models
-        working-directory: .
-        run: ./open-api-gen.sh
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
           python-version: 3.12
+      - name: Prepare venv
+        run: python -m venv venv
       - name: Install poetry
         uses: abatilo/actions-poetry@v4
       - name: Install dependencies
-        run: poetry install;
+        run: source venv/bin/activate && poetry install;
+      - name: generate openapi models
+        working-directory: .
+        run: ./open-api-gen.sh
       - name: run tests
         run: PYTHONPATH=test poetry run pytest -v;
   build-frontend:

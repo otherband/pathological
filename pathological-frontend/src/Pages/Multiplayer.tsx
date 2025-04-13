@@ -77,7 +77,7 @@ function StartGameDiv(props: { setGameState: (gameState: GameState) => void }) {
         </button>
       </form>
 
-      <div id="multiplayer-game-init-error-response-div"></div>
+      {startGameError && <div id="multiplayer-game-init-error-response-div">{startGameError}</div>}
     </div>
   );
 }

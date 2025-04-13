@@ -63,8 +63,11 @@ class MultiplayerGameService:
 
     def trigger_game_starting(self, game_id: str):
         self._verify_exists(game_id)
-
         game = self._game_repository.get_game(game_id)
+
+        if game.running:
+            raise UserInputException("Game already running!")
+
         game.running = True
         self._game_repository.update_game(game)
 
@@ -169,14 +172,7 @@ class MultiplayerGameService:
         self._game_repository.update_game(game)
 
         self._publish_ended_event(game, game_id)
-
-        def delete_game():
-            self._game_repository.delete_game(game_id)
-
-        self._task_scheduler.run_after(
-            seconds_delay=self._get_delete_game_delay(),
-            f=delete_game
-        )
+        self._game_repository.delete_game(game_id)
 
     def _publish_ended_event(self,
                              game: MultiplayerGame,

@@ -38,14 +38,15 @@ jobs:
       - name: Install poetry
         uses: abatilo/actions-poetry@v4
       - name: Prepare venv
+        working-directory: .
         run: python -m venv venv;
       - name: Install dependencies
-        run: source venv/bin/activate && poetry install;
+        run: cd .. && source venv/bin/activate && cd backend && poetry install;
       - name: generate openapi models
         working-directory: .
         run: ./open-api-gen.sh
       - name: run tests
-        run: source venv/bin/activate && PYTHONPATH=test poetry run pytest -v;
+        run: cd .. && source venv/bin/activate && cd backend && PYTHONPATH=test poetry run pytest -v;
   build-frontend:
     runs-on: ubuntu-latest
     defaults:

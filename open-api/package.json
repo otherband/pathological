@@ -10,6 +10,6 @@
     "pls-help": "openapi-generator-cli help"
   },
   "devDependencies": {
-    "@openapitools/openapi-generator-cli": "^2.18.4"
+    "@openapitools/openapi-generator-cli": "^2.20.2"
   }
 }

@@ -28,7 +28,7 @@ jobs:
         with:
           python-version: 3.12
       - name: Setup node for open-api get
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '18.x'
       - name: Set up Python 3.12
@@ -55,7 +55,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: "Node set-up"
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '18.x'
       - name: Generate open-api
